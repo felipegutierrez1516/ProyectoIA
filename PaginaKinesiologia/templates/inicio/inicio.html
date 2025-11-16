@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Kinesiología — Casos de Pacientes (UCN)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* ====== PALETA AZUL/BLANCO ====== */
+    :root{
+      --azul-900:#0a2a5e;
+      --azul-700:#1457a3;
+      --azul-600:#1a69c7;
+      --azul-050:#f3f7fe;
+      --azul-025:#f8fbff;
+      --borde:#e5eaf3;
+      --texto:#172236;
+      --muted:#5b6b86;
+      --peligro:#e53935;
+    }
+    html,body{
+      margin:0;height:100%;
+      background:var(--azul-025);
+      color:var(--texto);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+    }
+    a{color:inherit;text-decoration:none}
+    .contenedor{max-width:1100px;margin:auto;padding:24px}
+    .card{
+      background:#fff;border:1px solid var(--borde);border-radius:16px;padding:20px;
+      box-shadow:0 8px 26px rgba(10,42,94,.06)
+    }
+    .fila{display:flex;gap:16px;flex-wrap:wrap}
+    .col{flex:1 1 280px}
+    .titulo{font-size:28px;font-weight:800;margin:0 0 8px;color:var(--azul-900)}
+    .sub{font-size:14px;color:var(--muted);margin:0 0 16px}
+    .btn{
+      display:inline-block;padding:12px 18px;border-radius:12px;border:1px solid var(--borde);
+      background:#fff;color:var(--azul-900);cursor:pointer;font-weight:700
+    }
+    .btn:hover{background:var(--azul-050)}
+    .btn.primario{background:var(--azul-700);color:#fff;border-color:transparent}
+    .btn.primario:hover{background:var(--azul-600)}
+    .btn.peligro{background:var(--peligro);color:#fff;border-color:transparent}
+    .grid{display:grid;gap:12px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    label{font-size:13px;color:var(--muted);font-weight:600}
+    input,select,textarea{
+      width:100%;padding:12px;border-radius:12px;border:1px solid var(--borde);background:#fff;color:var(--texto)
+    }
+    textarea{min-height:120px;resize:vertical}
+    .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .tag{font-size:12px;padding:6px 10px;border:1px dashed var(--borde);border-radius:999px;color:var(--muted);background:#fff}
+    .oculto{display:none !important}
+    .seccion{margin-top:18px}
+    .separador{height:1px;background:var(--borde);margin:16px 0}
+    .pie{margin-top:24px;font-size:12px;color:var(--muted);text-align:center}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:12px;border-bottom:1px solid var(--borde);text-align:left}
+    th{color:var(--muted);font-weight:700}
+    header.sticky{
+      position:sticky;top:0;background:linear-gradient(180deg,#ffffff 60%, rgba(255,255,255,0.6));
+      z-index:10;border-bottom:1px solid var(--borde)
+    }
+    .marca{display:flex;align-items:center;gap:12px}
+    .marca img{height:44px;width:auto}
+    .marca h1{font-size:18px;margin:0;color:var(--azul-900);font-weight:800;letter-spacing:.2px}
+    /* tarjetas de casos */
+    .tarjeta-caso{
+      background:var(--azul-050);
+      border-radius:16px;
+      border:1px solid var(--borde);
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:stretch;
+    }
+    .tarjeta-caso img{
+      width:100%;
+      border-radius:12px;
+      object-fit:cover;
+      max-height:140px;
+    }
+    .tarjeta-titulo{font-weight:700;color:var(--azul-900);margin:4px 0}
+    .tarjeta-desc{font-size:13px;color:var(--muted);flex:1}
+    @media (max-width:720px){ .grid-2,.grid-3{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+
+    <!-- CABECERA -->
+    <header class="fila sticky" style="align-items:center;justify-content:space-between;padding:10px 0;">
+      <div class="marca">
+        <!-- cambia ucn-logo.png por la ruta a tu logo -->
+        <img src="ucn-logo.png" alt="Universidad Católica del Norte" />
+        <h1>Kinesiología — Casos de Pacientes</h1>
+      </div>
+      <nav class="nav">
+        <button class="btn" data-ir="inicio">Inicio</button>
+        <button class="btn" data-rol="estudiante" data-ir="casos">Casos</button>
+        <button class="btn" data-ir="resumen">Resumen</button>
+        <button class="btn oculto" data-rol="docente" data-ir="panel-docente">Panel Docente</button>
+        <button class="btn oculto" data-rol="docente" data-ir="video-preguntas">Video y Preguntas</button>
+      </nav>
+    </header>
+
+    <!-- LOGIN -->
+    <section id="inicio" class="seccion card">
+      <h2 class="titulo">Bienvenido(a)</h2>
+      <p class="sub">Inicia sesión con tu correo institucional. Te llevaremos a la vista de estudiante o docente.</p>
+
+      <div class="fila">
+        <div class="col">
+          <form id="formLogin" class="grid">
+            <div class="grid grid-2">
+              <div>
+                <label for="rol">Rol</label>
+                <select id="rol">
+                  <option value="estudiante">Estudiante (@alumnos.ucn.cl)</option>
+                  <option value="docente">Docente (@ucn.cl)</option>
+                </select>
+              </div>
+              <div>
+                <label for="correo">Correo institucional</label>
+                <input id="correo" type="email" placeholder="nombre@alumnos.ucn.cl" required />
+              </div>
+            </div>
+            <div class="grid grid-2">
+              <div>
+                <label for="clave">Contraseña</label>
+                <input id="clave" type="password" placeholder="••••••••" required />
+              </div>
+              <div style="display:flex;align-items:end">
+                <button type="submit" class="btn primario" style="width:100%">Ingresar</button>
+              </div>
+            </div>
+            <small class="sub">Se validará que el dominio del correo corresponda al rol seleccionado.</small>
+          </form>
+        </div>
+
+        <div class="col">
+          <div class="card" style="background:var(--azul-050)">
+            <h3 style="margin:0 0 8px;color:var(--azul-900)">Activar modo Docente</h3>
+            <p class="sub">Si ya estás autenticado y necesitas las funciones de docente, ingresa tu correo @ucn.cl.</p>
+            <div class="grid grid-2">
+              <input id="correoDocenteRapido" placeholder="profesor@ucn.cl" />
+              <button type="button" id="toggleDocente" class="btn primario">Activar modo Docente</button>
+            </div>
+            <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
+              <span class="tag" id="estadoDocente">Modo Docente: OFF</span>
+              <span class="tag" id="usuarioActual">Rol: Visitante</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASOS PACIENTES (VISTA ESTUDIANTE) -->
+    <section id="casos" class="seccion card oculto">
+      <h2 class="titulo">Casos de Pacientes</h2>
+      <div class="sub">Selecciona un caso. Primero verás el video y luego podrás rellenar la información clínica.</div>
+
+      <div class="grid grid-3" style="margin-top:12px">
+        <!-- Caso 1 -->
+        <div class="tarjeta-caso">
+          <img src="paciente1.jpg" alt="Paciente caso 1" />
+          <div class="tarjeta-titulo">Caso 1 — Dolor lumbar</div>
+          <div class="tarjeta-desc">Paciente adulto joven con dolor lumbar mecánico de 2 semanas de evolución.</div>
+          <button class="btn primario" data-accion="ver-video" data-caso="1" data-src="videos/caso1.mp4">
+            Ver video del caso
+          </button>
+        </div>
+        <!-- Caso 2 -->
+        <div class="tarjeta-caso">
+          <img src="paciente2.jpg" alt="Paciente caso 2" />
+          <div class="tarjeta-titulo">Caso 2 — Esguince de tobillo</div>
+          <div class="tarjeta-desc">Paciente deportista con esguince lateral de tobillo grado II.</div>
+          <button class="btn primario" data-accion="ver-video" data-caso="2" data-src="videos/caso2.mp4">
+            Ver video del caso
+          </button>
+        </div>
+        <!-- Caso 3 -->
+        <div class="tarjeta-caso">
+          <img src="paciente3.jpg" alt="Paciente caso 3" />
+          <div class="tarjeta-titulo">Caso 3 — Rehabilitación post-op</div>
+          <div class="tarjeta-desc">Paciente post cirugía de rodilla en fase inicial de rehabilitación.</div>
+          <button class="btn primario" data-accion="ver-video" data-caso="3" data-src="videos/caso3.mp4">
+            Ver video del caso
+          </button>
+        </div>
+      </div>
+
+      <div class="separador"></div>
+
+      <!-- Botón de solicitud de inscripción (solo estudiante) -->
+      <div class="fila">
+        <button class="btn" data-rol="estudiante" data-ir="inscripcion">Solicitud de inscripción</button>
+        <button class="btn" data-ir="inicio">Volver al Inicio</button>
+      </div>
+    </section>
+
+    <!-- SOLICITUD DE INSCRIPCIÓN -->
+    <section id="inscripcion" class="seccion card oculto">
+      <h2 class="titulo">Solicitud de inscripción</h2>
+      <p class="sub">Completa tus datos para inscribirte en la actividad de casos clínicos.</p>
+      <form class="grid">
+        <div class="grid grid-2">
+          <div>
+            <label>Carrera</label>
+            <input id="ins_carrera" placeholder="Kinesiología" />
+          </div>
+          <div>
+            <label>Año</label>
+            <input id="ins_anio" placeholder="3° año" />
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div>
+            <label>Nombre y Apellido</label>
+            <input id="ins_nombre" placeholder="Nombre Apellido" />
+          </div>
+          <div>
+            <label>Nombre del curso</label>
+            <input id="ins_curso" placeholder="Evaluación Kinesiológica I" />
+          </div>
+        </div>
+        <div class="fila">
+          <button type="button" class="btn primario" id="btnEnviarInscripcion">Enviar inscripción</button>
+          <button type="button" class="btn" data-ir="casos">Volver</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- VIDEO DEL CASO (ESTUDIANTE) -->
+    <section id="video-estudiante" class="seccion card oculto">
+      <h2 class="titulo" id="tituloCasoVideo">Video del caso</h2>
+      <p class="sub">Observa el video del paciente ficticio y luego completa la información del caso.</p>
+      <video id="videoCaso" controls style="width:100%;border-radius:16px;background:#000">
+        <source id="fuenteVideoCaso" src="" type="video/mp4" />
+        Tu navegador no soporta el elemento de video.
+      </video>
+
+      <div class="separador"></div>
+
+      <div id="bloquePreguntasEstudiante">
+        <h3 style="margin:0 0 8px;color:var(--azul-900)">Preguntas del caso</h3>
+        <ul id="listaPreguntasEstudiante" style="margin:0;padding-left:20px;font-size:14px;color:var(--muted)"></ul>
+      </div>
+
+      <div class="separador"></div>
+      <div class="fila">
+        <button class="btn primario" data-ir="datos">Rellenar información del caso</button>
+        <button class="btn" data-ir="casos">Volver a Casos</button>
+      </div>
+    </section>
+
+    <!-- DATOS DEL PACIENTE -->
+    <section id="datos" class="seccion card oculto">
+      <h2 class="titulo">Datos del Paciente</h2>
+      <form class="grid">
+        <div class="grid grid-3">
+          <div><label>Nombre</label><input id="paciente_nombre" placeholder="Nombre y Apellido" /></div>
+          <div><label>Edad [años]</label><input id="paciente_edad" type="number" min="0" /></div>
+          <div><label>Género</label>
+            <select id="paciente_genero"><option value="">Seleccione…</option><option>Femenino</option><option>Masculino</option><option>No binario</option><option>Prefiero no decir</option></select>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div><label>Motivo de consulta</label><input id="motivo" placeholder="Dolor lumbar, esguince, post-op…" /></div>
+          <div><label>Antecedentes relevantes</label><input id="antecedentes" placeholder="HTA, DM2, cirugías, etc." /></div>
+        </div>
+        <label>Notas</label><textarea id="notas_datos" placeholder="Observaciones generales…"></textarea>
+        <div class="fila">
+          <button type="button" class="btn primario" data-ir="sintomas">Siguiente: Síntomas</button>
+          <button type="button" class="btn" data-ir="video-estudiante">Volver al video</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SÍNTOMAS -->
+    <section id="sintomas" class="seccion card oculto">
+      <h2 class="titulo">Síntomas del Paciente</h2>
+      <form class="grid">
+        <div class="grid grid-2">
+          <div><label>Dolor (EVA 0–10)</label><input id="eva" type="number" min="0" max="10" /></div>
+          <div><label>Inicio</label>
+            <select id="inicio"><option value="">Seleccione…</option><option>Agudo</option><option>Subagudo</option><option>Crónico</option></select>
+          </div>
+        </div>
+        <div><label>Localización / Irradiación</label><input id="localizacion" placeholder="Zona lumbar derecha, irradiación a glúteo…" /></div>
+        <label>Descripción</label><textarea id="descripcion_sintomas" placeholder="Factores agravantes, alivio, 24h, banderas rojas…"></textarea>
+        <div class="fila">
+          <button type="button" class="btn primario" data-ir="examen">Siguiente: Examen Físico</button>
+          <button type="button" class="btn" data-ir="datos">Volver</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- EXAMEN FÍSICO -->
+    <section id="examen" class="seccion card oculto">
+      <h2 class="titulo">Examen Físico del Paciente</h2>
+      <form class="grid">
+        <div class="grid grid-3">
+          <div><label>Inspección</label><textarea id="inspeccion" placeholder="Postura, asimetrías, marcha…"></textarea></div>
+          <div><label>Movilidad activa/pasiva</label><textarea id="movilidad" placeholder="Rangos, dolor al final de rango…"></textarea></div>
+          <div><label>Pruebas específicas</label><textarea id="pruebas" placeholder="SLR, FABER, test compresión, etc."></textarea></div>
+        </div>
+        <div class="fila">
+          <button type="button" class="btn primario" data-ir="diagnostico">Siguiente: Diagnóstico</button>
+          <button type="button" class="btn" data-ir="sintomas">Volver</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- DIAGNÓSTICO -->
+    <section id="diagnostico" class="seccion card oculto">
+      <h2 class="titulo">Diagnóstico del Paciente</h2>
+      <form class="grid">
+        <div><label>Impresión clínica</label><input id="impresion" placeholder="Lumbalgia mecánica, etc." /></div>
+        <div class="grid grid-2">
+          <div><label>CIE-10 (opcional)</label><input id="cie10" placeholder="M54.5, S33.5, etc." /></div>
+          <div><label>Prioridad</label>
+            <select id="prioridad"><option value="">Seleccione…</option><option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option></select>
+          </div>
+        </div>
+        <label>Notas</label><textarea id="notas_dx" placeholder="Justificación clínica y correlación…"></textarea>
+        <div class="fila">
+          <button type="button" class="btn primario" data-ir="plan">Siguiente: Plan de Tratamiento</button>
+          <button type="button" class="btn" data-ir="examen">Volver</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- PLAN -->
+    <section id="plan" class="seccion card oculto">
+      <h2 class="titulo">Plan de Tratamiento</h2>
+      <form class="grid">
+        <div class="grid grid-3">
+          <div><label>Objetivos</label><textarea id="objetivos" placeholder="Disminuir EVA a ≤3 en 2 semanas…"></textarea></div>
+          <div><label>Intervenciones</label><textarea id="intervenciones" placeholder="Terapia manual, ejercicio, educación…"></textarea></div>
+          <div><label>Frecuencia / Duración</label><textarea id="frecuencia" placeholder="2–3 sesiones/semana por 4–6 semanas…"></textarea></div>
+        </div>
+        <div class="fila">
+          <button type="button" class="btn primario" data-ir="resumen">Ver Resumen</button>
+          <button type="button" class="btn" data-ir="diagnostico">Volver</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- RESUMEN (estudiante solo ve resumen; docente además escribe retro) -->
+    <section id="resumen" class="seccion card oculto">
+      <h2 class="titulo">Resumen del Caso</h2>
+      <table>
+        <thead><tr><th>Bloque</th><th>Extracto</th></tr></thead>
+        <tbody id="tablaResumen"></tbody>
+      </table>
+
+      <div class="separador"></div>
+
+      <!-- Retroalimentación solo para docente -->
+      <div id="bloqueRetroDocente" class="grid oculto" data-rol="docente">
+        <label for="retro">Retroalimentación del Docente</label>
+        <textarea id="retro" placeholder="Escribe la retro sobre el resumen del estudiante…"></textarea>
+        <button class="btn primario" type="button" id="btnGuardarRetro">Guardar retroalimentación</button>
+      </div>
+
+      <div class="fila" style="margin-top:16px">
+        <button class="btn peligro oculto" data-rol="docente" id="btnCancelarDocente">Cancelar (Docente)</button>
+        <button class="btn" data-ir="inicio">Volver al Inicio</button>
+      </div>
+    </section>
+
+    <!-- PANEL DOCENTE -->
+    <section id="panel-docente" class="seccion card oculto">
+      <h2 class="titulo">Panel Docente</h2>
+      <p class="sub">Acceso rápido a los bloques del caso y gestión de datos.</p>
+      <div class="grid grid-3" style="margin-top:12px">
+        <button class="btn" data-ir="casos">Ver Casos (vista estudiante)</button>
+        <button class="btn" data-ir="datos">Datos del Paciente</button>
+        <button class="btn" data-ir="examen">Examen Físico</button>
+        <button class="btn" data-ir="sintomas">Síntomas</button>
+        <button class="btn" data-ir="diagnostico">Diagnóstico</button>
+        <button class="btn" data-ir="plan">Plan de Tratamiento</button>
+      </div>
+      <div class="separador"></div>
+      <div class="fila">
+        <button class="btn peligro" id="btnEliminarPaciente">Eliminar Paciente</button>
+        <button class="btn" data-ir="inicio">Volver al Inicio</button>
+      </div>
+    </section>
+
+    <!-- GESTIÓN DE VIDEO Y PREGUNTAS (DOCENTE) -->
+    <section id="video-preguntas" class="seccion card oculto">
+      <h2 class="titulo">Gestión de Video y Preguntas</h2>
+      <p class="sub">(Solo Docente) Rellena datos y videos asociados a los pacientes.</p>
+
+      <div class="grid grid-2" style="margin-bottom:12px">
+        <div>
+          <label for="selectCasoGestion">Caso a gestionar</label>
+          <select id="selectCasoGestion"></select>
+        </div>
+        <div>
+          <label>Video actual (ruta)</label>
+          <input id="rutaVideoActual" disabled />
+        </div>
+      </div>
+
+      <div class="fila" style="margin-bottom:8px">
+        <input type="file" id="archivoVideo" accept="video/*" />
+        <button class="btn primario" type="button" id="btnSubirVideo">Subir Vídeo</button>
+        <button class="btn peligro" type="button" id="btnEliminarVideo">Eliminar Video</button>
+        <button class="btn" type="button" id="btnCambiarVideo">Cambiar Vídeo</button>
+      </div>
+      <small class="sub">En este prototipo, el video se guarda como ruta local o nombre de archivo. La carga real en servidor se haría en el backend.</small>
+
+      <div class="separador"></div>
+      <form class="grid">
+        <label>Nueva pregunta para el caso</label>
+        <input id="nueva_pregunta" placeholder="Escribe la pregunta para el caso…" />
+        <div class="fila">
+          <button type="button" class="btn primario" id="btnAgregarPregunta">Agregar Pregunta</button>
+          <button type="button" class="btn peligro" id="btnEliminarPregunta">Eliminar última Pregunta</button>
+          <button type="button" class="btn" id="btnModificarPregunta">Modificar última Pregunta</button>
+        </div>
+      </form>
+
+      <div class="separador"></div>
+      <h3 style="margin:0 0 8px;color:var(--azul-900)">Preguntas actuales del caso</h3>
+      <ul id="listaPreguntasDocente" style="margin:0 0 16px;padding-left:20px;font-size:14px;color:var(--muted)"></ul>
+
+      <div class="separador"></div>
+      <button class="btn" data-ir="panel-docente">Volver al Panel Docente</button>
+    </section>
+
+    <footer class="pie">
+      © <span id="anio"></span> Universidad Católica del Norte — Prototipo académico
+    </footer>
+  </div>
+
+  <script>
+    const estado = {
+      seccion: "inicio",
+      usuarioRol: "visitante", // 'estudiante' | 'docente' | 'visitante'
+      casoActivo: null,
+      datos: {
+        nombre:"", edad:"", genero:"",
+        motivo:"", antecedentes:"", notas_datos:"",
+        eva:"", inicio:"", localizacion:"", descripcion_sintomas:"",
+        inspeccion:"", movilidad:"", pruebas:"",
+        impresion:"", cie10:"", prioridad:"", notas_dx:"",
+        objetivos:"", intervenciones:"", frecuencia:""
+      }
+    };
+
+    const STORAGE_KEY = "kine_ucn_app_v1";
+    let appData = {
+      casos:{
+        "1":{titulo:"Dolor lumbar", video:"videos/caso1.mp4", preguntas:[]},
+        "2":{titulo:"Esguince de tobillo", video:"videos/caso2.mp4", preguntas:[]},
+        "3":{titulo:"Rehabilitación post-op", video:"videos/caso3.mp4", preguntas:[]}
+      },
+      inscripciones:[],
+      retroalimentaciones:{} // clave: casoId o "general", valor: texto
+    };
+
+    function cargarAppData(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          if(parsed && parsed.casos){
+            appData = parsed;
+          }
+        }
+      }catch(e){
+        console.warn("No se pudo leer localStorage", e);
+      }
+    }
+
+    function guardarAppData(){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      }catch(e){
+        console.warn("No se pudo guardar en localStorage", e);
+      }
+    }
+
+    function mostrarSeccion(id){
+      document.querySelectorAll(".seccion").forEach(s=>s.classList.add("oculto"));
+      const obj = document.getElementById(id);
+      if(obj){ obj.classList.remove("oculto"); estado.seccion = id; }
+      if(id === "resumen"){ renderResumen(); }
+      if(id === "video-preguntas"){ syncGestionVideo(); }
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    function textoCorto(t){ t=t||""; return t.length>80? t.slice(0,77)+"…" : t; }
+    function esc(t){ return (t||"").replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m])); }
+
+    function aplicarRol(){
+      // elementos solo docente
+      document.querySelectorAll("[data-rol='docente']").forEach(el=>{
+        el.classList.toggle("oculto", estado.usuarioRol !== "docente");
+      });
+      // elementos solo estudiante
+      document.querySelectorAll("[data-rol='estudiante']").forEach(el=>{
+        el.classList.toggle("oculto", estado.usuarioRol !== "estudiante");
+      });
+      document.getElementById("estadoDocente").textContent =
+        "Modo Docente: " + (estado.usuarioRol === "docente" ? "ON" : "OFF");
+      document.getElementById("usuarioActual").textContent =
+        "Rol: " + (estado.usuarioRol.charAt(0).toUpperCase()+estado.usuarioRol.slice(1));
+    }
+
+    function renderResumen(){
+      const leer = (sel)=>{ const el=document.querySelector(sel); return el?el.value:""; };
+      estado.datos = {
+        nombre: leer("#paciente_nombre"),
+        edad: leer("#paciente_edad"),
+        genero: leer("#paciente_genero"),
+        motivo: leer("#motivo"),
+        antecedentes: leer("#antecedentes"),
+        notas_datos: leer("#notas_datos"),
+        eva: leer("#eva"),
+        inicio: leer("#inicio"),
+        localizacion: leer("#localizacion"),
+        descripcion_sintomas: leer("#descripcion_sintomas"),
+        inspeccion: leer("#inspeccion"),
+        movilidad: leer("#movilidad"),
+        pruebas: leer("#pruebas"),
+        impresion: leer("#impresion"),
+        cie10: leer("#cie10"),
+        prioridad: leer("#prioridad"),
+        notas_dx: leer("#notas_dx"),
+        objetivos: leer("#objetivos"),
+        intervenciones: leer("#intervenciones"),
+        frecuencia: leer("#frecuencia")
+      };
+
+      const filas = [
+        ["Datos del Paciente", `${estado.datos.nombre||"-"}, ${estado.datos.edad||"-"} años, ${estado.datos.genero||"-"}. Motivo: ${estado.datos.motivo||"-"}`],
+        ["Síntomas", `EVA: ${estado.datos.eva||"-"}; Inicio: ${estado.datos.inicio||"-"}; Loc.: ${estado.datos.localizacion||"-"}`],
+        ["Examen Físico", `Inspección: ${textoCorto(estado.datos.inspeccion)}; Movilidad: ${textoCorto(estado.datos.movilidad)}; Pruebas: ${textoCorto(estado.datos.pruebas)}`],
+        ["Diagnóstico", `Impresión: ${estado.datos.impresion||"-"}; CIE-10: ${estado.datos.cie10||"-"}; Prioridad: ${estado.datos.prioridad||"-"}`],
+        ["Plan", `Obj.: ${textoCorto(estado.datos.objetivos)}; Interv.: ${textoCorto(estado.datos.intervenciones)}; Frec.: ${textoCorto(estado.datos.frecuencia)}`]
+      ];
+
+      const tbody = document.getElementById("tablaResumen");
+      tbody.innerHTML = filas.map(([bloque,desc])=> `<tr><td>${bloque}</td><td>${esc(desc)}</td></tr>`).join("");
+
+      // Cargar retro previa si existe (por caso o general)
+      const retroArea = document.getElementById("retro");
+      if(retroArea){
+        const clave = estado.casoActivo || "general";
+        retroArea.value = appData.retroalimentaciones[clave] || "";
+      }
+    }
+
+    function actualizarPreguntasEstudiante(){
+      const ul = document.getElementById("listaPreguntasEstudiante");
+      if(!ul) return;
+      const casoId = estado.casoActivo || "1";
+      const caso = appData.casos[casoId];
+      const preguntas = (caso && caso.preguntas) ? caso.preguntas : [];
+      if(preguntas.length === 0){
+        ul.innerHTML = "<li>No hay preguntas asociadas a este caso todavía.</li>";
+      }else{
+        ul.innerHTML = preguntas.map(p=>`<li>${esc(p)}</li>`).join("");
+      }
+    }
+
+    function actualizarPreguntasDocente(){
+      const ul = document.getElementById("listaPreguntasDocente");
+      if(!ul) return;
+      const select = document.getElementById("selectCasoGestion");
+      const casoId = select?.value || "1";
+      const caso = appData.casos[casoId];
+      const preguntas = (caso && caso.preguntas) ? caso.preguntas : [];
+      if(preguntas.length === 0){
+        ul.innerHTML = "<li>No hay preguntas registradas para este caso.</li>";
+      }else{
+        ul.innerHTML = preguntas.map((p,i)=>`<li><strong>P${i+1}:</strong> ${esc(p)}</li>`).join("");
+      }
+    }
+
+    function initSelectCaso(){
+      const select = document.getElementById("selectCasoGestion");
+      if(!select) return;
+      const opciones = Object.entries(appData.casos).map(([id,c])=>
+        `<option value="${id}">Caso ${id} — ${esc(c.titulo)}</option>`
+      );
+      select.innerHTML = opciones.join("");
+      select.addEventListener("change", syncGestionVideo);
+      syncGestionVideo();
+    }
+
+    function syncGestionVideo(){
+      const select = document.getElementById("selectCasoGestion");
+      const ruta = document.getElementById("rutaVideoActual");
+      if(!select || !ruta) return;
+      const casoId = select.value || "1";
+      const caso = appData.casos[casoId];
+      ruta.value = caso?.video || "";
+      actualizarPreguntasDocente();
+    }
+
+    // Navegación general y casos
+    document.addEventListener("click", (e)=>{
+      const ir = e.target?.dataset?.ir;
+      if(ir){
+        mostrarSeccion(ir);
+      }
+
+      // Ver video de caso (estudiante)
+      const accion = e.target?.dataset?.accion;
+      if(accion === "ver-video"){
+        const caso = e.target.dataset.caso;
+        const btnSrc = e.target.dataset.src || "";
+        estado.casoActivo = caso;
+        const casoData = appData.casos[caso] || {};
+        const src = casoData.video || btnSrc;
+
+        const video = document.getElementById("videoCaso");
+        const fuente = document.getElementById("fuenteVideoCaso");
+        const titulo = document.getElementById("tituloCasoVideo");
+        if(fuente){ fuente.src = src; }
+        if(video){ video.load(); }
+        if(titulo){ titulo.textContent = "Video del Caso " + caso; }
+
+        mostrarSeccion("video-estudiante");
+        actualizarPreguntasEstudiante();
+      }
+    });
+
+    // LOGIN
+    const formLogin = document.getElementById("formLogin");
+    const selRol = document.getElementById("rol");
+    const inputCorreo = document.getElementById("correo");
+
+    selRol.addEventListener("change", ()=>{
+      const esDoc = selRol.value === "docente";
+      inputCorreo.placeholder = esDoc ? "nombre@ucn.cl" : "nombre@alumnos.ucn.cl";
+    });
+
+    formLogin.addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const rol = selRol.value;
+      const correo = (inputCorreo.value||"").trim().toLowerCase();
+      const okEst  = rol==="estudiante" && correo.endsWith("@alumnos.ucn.cl");
+      const okDoc  = rol==="docente"    && correo.endsWith("@ucn.cl");
+
+      if(!(okEst || okDoc)){
+        alert("Correo inválido para el rol seleccionado.\n- Estudiante: @alumnos.ucn.cl\n- Docente: @ucn.cl");
+        return;
+      }
+
+      if(okEst){
+        estado.usuarioRol = "estudiante";
+        aplicarRol();
+        mostrarSeccion("casos");
+      }else if(okDoc){
+        estado.usuarioRol = "docente";
+        aplicarRol();
+        mostrarSeccion("panel-docente");
+      }
+    });
+
+    // Activar modo docente rápido
+    const toggleDoc = document.getElementById("toggleDocente");
+    const correoDocenteRapido = document.getElementById("correoDocenteRapido");
+    toggleDoc?.addEventListener("click", ()=>{
+      const c = (correoDocenteRapido.value||"").trim().toLowerCase();
+      if(!c.endsWith("@ucn.cl")){
+        alert("Para activar el modo Docente, ingresa un correo que termine en @ucn.cl");
+        return;
+      }
+      estado.usuarioRol = "docente";
+      aplicarRol();
+      alert("Modo Docente activado.");
+    });
+
+    // Enviar inscripción (se almacena en localStorage como prototipo)
+    const btnEnviarInscripcion = document.getElementById("btnEnviarInscripcion");
+    btnEnviarInscripcion?.addEventListener("click", ()=>{
+      const carrera = (document.getElementById("ins_carrera")?.value||"").trim();
+      const anio    = (document.getElementById("ins_anio")?.value||"").trim();
+      const nombre  = (document.getElementById("ins_nombre")?.value||"").trim();
+      const curso   = (document.getElementById("ins_curso")?.value||"").trim();
+
+      if(!nombre || !carrera){
+        alert("Por favor completa al menos Nombre y Carrera.");
+        return;
+      }
+
+      appData.inscripciones.push({
+        fecha: new Date().toISOString(),
+        carrera, anio, nombre, curso
+      });
+      guardarAppData();
+      alert("Inscripción enviada. (Guardada localmente en este prototipo)");
+    });
+
+    // Guardar retroalimentación (docente)
+    const btnGuardarRetro = document.getElementById("btnGuardarRetro");
+    btnGuardarRetro?.addEventListener("click", ()=>{
+      const retro = document.getElementById("retro")?.value || "";
+      const clave = estado.casoActivo || "general";
+      appData.retroalimentaciones[clave] = retro;
+      guardarAppData();
+      alert("Retroalimentación guardada para " + (estado.casoActivo ? "Caso " + estado.casoActivo : "el caso general") + ".");
+    });
+
+    // Cancelar (Docente) = limpiar datos del paciente y resumen
+    const btnCancelarDocente = document.getElementById("btnCancelarDocente");
+    btnCancelarDocente?.addEventListener("click", ()=>{
+      if(!confirm("¿Seguro que deseas limpiar todos los datos del paciente?")){
+        return;
+      }
+      limpiarCamposPaciente();
+      renderResumen();
+      const retro = document.getElementById("retro");
+      if(retro) retro.value = "";
+      alert("Datos del paciente y resumen limpiados.");
+    });
+
+    // Eliminar Paciente (Docente) = igual que cancelar
+    const btnEliminarPaciente = document.getElementById("btnEliminarPaciente");
+    btnEliminarPaciente?.addEventListener("click", ()=>{
+      if(!confirm("¿Seguro que deseas eliminar todos los datos del paciente actual?")){
+        return;
+      }
+      limpiarCamposPaciente();
+      renderResumen();
+      alert("Paciente eliminado (solo en este navegador / prototipo).");
+    });
+
+    function limpiarCamposPaciente(){
+      const ids = [
+        "paciente_nombre","paciente_edad","paciente_genero",
+        "motivo","antecedentes","notas_datos",
+        "eva","inicio","localizacion","descripcion_sintomas",
+        "inspeccion","movilidad","pruebas",
+        "impresion","cie10","prioridad","notas_dx",
+        "objetivos","intervenciones","frecuencia"
+      ];
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.tagName === "SELECT"){
+          el.selectedIndex = 0;
+        }else{
+          el.value = "";
+        }
+      });
+      estado.datos = {
+        nombre:"", edad:"", genero:"",
+        motivo:"", antecedentes:"", notas_datos:"",
+        eva:"", inicio:"", localizacion:"", descripcion_sintomas:"",
+        inspeccion:"", movilidad:"", pruebas:"",
+        impresion:"", cie10:"", prioridad:"", notas_dx:"",
+        objetivos:"", intervenciones:"", frecuencia:""
+      };
+    }
+
+    // Gestión de video (docente)
+    const archivoVideo = document.getElementById("archivoVideo");
+    const btnSubirVideo = document.getElementById("btnSubirVideo");
+    const btnEliminarVideo = document.getElementById("btnEliminarVideo");
+    const btnCambiarVideo = document.getElementById("btnCambiarVideo");
+
+    function obtenerCasoGestion(){
+      const select = document.getElementById("selectCasoGestion");
+      return select?.value || "1";
+    }
+
+    btnSubirVideo?.addEventListener("click", ()=>{
+      const file = archivoVideo?.files?.[0];
+      if(!file){
+        alert("Selecciona un archivo de video primero.");
+        return;
+      }
+      const casoId = obtenerCasoGestion();
+      // En un sistema real se subiría al servidor; aquí guardamos el nombre.
+      appData.casos[casoId].video = "videos/" + file.name;
+      guardarAppData();
+      syncGestionVideo();
+      alert("Video asociado al Caso " + casoId + " (nombre de archivo guardado).");
+    });
+
+    btnEliminarVideo?.addEventListener("click", ()=>{
+      const casoId = obtenerCasoGestion();
+      appData.casos[casoId].video = "";
+      guardarAppData();
+      syncGestionVideo();
+      alert("Video del Caso " + casoId + " eliminado (en este prototipo).");
+    });
+
+    btnCambiarVideo?.addEventListener("click", ()=>{
+      const file = archivoVideo?.files?.[0];
+      if(!file){
+        alert("Selecciona un nuevo archivo para cambiar el video.");
+        return;
+      }
+      const casoId = obtenerCasoGestion();
+      appData.casos[casoId].video = "videos/" + file.name;
+      guardarAppData();
+      syncGestionVideo();
+      alert("Video del Caso " + casoId + " actualizado.");
+    });
+
+    // Gestión de preguntas (docente)
+    const btnAgregarPregunta = document.getElementById("btnAgregarPregunta");
+    const btnEliminarPregunta = document.getElementById("btnEliminarPregunta");
+    const btnModificarPregunta = document.getElementById("btnModificarPregunta");
+    const inputPregunta = document.getElementById("nueva_pregunta");
+
+    btnAgregarPregunta?.addEventListener("click", ()=>{
+      const texto = (inputPregunta?.value || "").trim();
+      if(!texto){
+        alert("Escribe una pregunta antes de agregarla.");
+        return;
+      }
+      const casoId = obtenerCasoGestion();
+      appData.casos[casoId].preguntas.push(texto);
+      guardarAppData();
+      inputPregunta.value = "";
+      actualizarPreguntasDocente();
+      if(estado.casoActivo === casoId){
+        actualizarPreguntasEstudiante();
+      }
+    });
+
+    btnEliminarPregunta?.addEventListener("click", ()=>{
+      const casoId = obtenerCasoGestion();
+      const lista = appData.casos[casoId].preguntas;
+      if(!lista || lista.length === 0){
+        alert("No hay preguntas para eliminar.");
+        return;
+      }
+      lista.pop();
+      guardarAppData();
+      actualizarPreguntasDocente();
+      if(estado.casoActivo === casoId){
+        actualizarPreguntasEstudiante();
+      }
+    });
+
+    btnModificarPregunta?.addEventListener("click", ()=>{
+      const texto = (inputPregunta?.value || "").trim();
+      if(!texto){
+        alert("Escribe el nuevo texto para la última pregunta.");
+        return;
+      }
+      const casoId = obtenerCasoGestion();
+      const lista = appData.casos[casoId].preguntas;
+      if(!lista || lista.length === 0){
+        alert("No hay preguntas para modificar.");
+        return;
+      }
+      lista[lista.length-1] = texto;
+      guardarAppData();
+      inputPregunta.value = "";
+      actualizarPreguntasDocente();
+      if(estado.casoActivo === casoId){
+        actualizarPreguntasEstudiante();
+      }
+    });
+
+    // Inicialización
+    document.getElementById("anio").textContent = new Date().getFullYear();
+    cargarAppData();
+    aplicarRol();
+    initSelectCaso();
+  </script>
+</body>
+</html>

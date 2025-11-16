@@ -1,0 +1,28 @@
+{% load static %}
+
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso UCN</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+  <div class="login-container">
+    <img src="{% static 'img/logo_ucn.png' %}" alt="Logo UCN" class="logo">
+    <h2>Acceder</h2>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="email" name="email" placeholder="Correo Institucional" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button type="submit">Acceder</button>
+    </form>
+
+    <a  class="forgot-link">¿Olvidó su nombre de usuario o contraseña?</a>
+    <footer>Copyright © 2025 UCN Todos los derechos reservados</footer>
+  </div>
+</body>
+</html>
+
