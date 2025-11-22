@@ -19,7 +19,7 @@ def login_view(request):
             if perfil.rol == 'docente':
                 return redirect('/admin/')
             elif perfil.rol == 'estudiante':
-                return redirect('/inicio/')
+                return redirect('inicio_estudiante')
         else:
             return render(request, 'usuarios/login.html', {'error': 'Credenciales inválidas'})
 
@@ -30,9 +30,10 @@ def redireccion_inicio(request):
 
 
 
+
 from django.contrib.auth.models import User
-from applications.usuarios.models import Perfil
 from django.contrib.auth.hashers import make_password
+from applications.usuarios.models import Perfil, Estudiante, Docente
 
 def registro_view(request):
     if request.method == 'POST':
@@ -42,13 +43,15 @@ def registro_view(request):
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
 
+        # Validaciones previas
         if User.objects.filter(username=username).exists():
             return render(request, 'usuarios/registro.html', {'error': 'Nombre de usuario ya existe'})
         if User.objects.filter(email=email).exists():
             return render(request, 'usuarios/registro.html', {'error': 'Correo ya registrado'})
 
+        # Crear usuario
         user = User.objects.create(
-            username=username,
+            username=email,
             password=make_password(password),
             email=email,
             first_name=first_name,
@@ -63,19 +66,19 @@ def registro_view(request):
         else:
             rol = 'estudiante'
 
-        perfil = Perfil.objects.create(user=user, rol=rol)
+        # Verificar si ya existe perfil
+        perfil, creado = Perfil.objects.get_or_create(user=user, defaults={'rol': rol})
 
-        # Crear Estudiante o Docente según rol
+        # Crear Estudiante o Docente si no existen
         if rol == 'estudiante':
-            from applications.usuarios.models import Estudiante
-            Estudiante.objects.create(perfil=perfil)
-            return redirect('/usuarios/login/')
+            Estudiante.objects.get_or_create(perfil=perfil)
         else:
-            from applications.usuarios.models import Docente
-            Docente.objects.create(perfil=perfil)
-            return redirect('/usuarios/login/')
+            Docente.objects.get_or_create(perfil=perfil)
+
+        return redirect('/usuarios/login/')
 
     return render(request, 'usuarios/registro.html')
+
 
 
 

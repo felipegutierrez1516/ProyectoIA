@@ -1,23 +1,55 @@
-<form method="POST">
-  {% csrf_token %}
-  <label>Nombre</label>
-  <input type="text" name="first_name" required>
+{% load static %}
 
-  <label>Apellido</label>
-  <input type="text" name="last_name" required>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - Universidad Católica del Norte</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_registro.css' %}">
+</head>
+<body>
+    <div class="contenedor-registro">
+        <div class="formulario">
+            <h1>Universidad Católica del Norte</h1>
+            <h2>Crear cuenta</h2>
 
-  <label>Correo electrónico</label>
-  <input type="email" name="email" required>
+            <form method="POST">
+                {% csrf_token %}
+                <label>Nombre</label>
+                <input type="text" name="first_name" required>
 
-  <label>Nombre de usuario</label>
-  <input type="text" name="username" required>
+                <label>Apellido</label>
+                <input type="text" name="last_name" required>
 
-  <label>Contraseña</label>
-  <input type="password" name="password" required>
+                <label>Correo electrónico</label>
+                <input type="email" name="email" required>
 
-  <button type="submit">Registrarse</button>
+                <label>Nombre de usuario</label>
+                <input type="text" name="username" placeholder="ej: felipe.gutierrez03" required>
 
-  {% if error %}
-    <p style="color:red;">{{ error }}</p>
-  {% endif %}
-</form>
+                <label>Contraseña</label>
+                <input type="password" name="password" required>
+
+                <button type="submit">Registrarse</button>
+
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+            </form>
+
+            <div class="acciones-extra">
+                <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+        </div>
+
+        <div class="banner">
+            <!-- Imagen institucional o fondo azul -->
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
+        <a href="#">English</a>
+    </footer>
+</body>
+</html>

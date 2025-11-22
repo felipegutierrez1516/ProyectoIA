@@ -22,5 +22,7 @@ urlpatterns = [
     path('', redireccion_inicio),
     path('admin/', admin.site.urls),
     path('usuarios/', include('applications.usuarios.urls')),
+    path('inscripciones/', include('applications.inscripciones.urls')),
+
 ]
 

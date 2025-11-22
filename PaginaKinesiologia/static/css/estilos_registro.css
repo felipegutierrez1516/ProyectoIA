@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f4f4;
+}
+
+.contenedor-registro {
+    display: flex;
+    height: 100vh;
+}
+
+.formulario {
+    flex: 1;
+    padding: 40px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.formulario h1 {
+    color: #002b5c;
+    margin-bottom: 10px;
+}
+
+.formulario h2 {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #002b5c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #004080;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.acciones-extra {
+    margin-top: 20px;
+}
+
+.banner {
+    flex: 1;
+    background-color: #002b5c;
+    background-image: url('/static/img/banner_ucn.png');
+    background-size: cover;
+    background-position: center;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #002b5c;
+    color: white;
+}

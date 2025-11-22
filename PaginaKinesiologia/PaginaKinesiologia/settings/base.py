@@ -131,6 +131,8 @@ LOGOUT_REDIRECT_URL = '/'
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
 # 🔹 Agrega esta línea:
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
