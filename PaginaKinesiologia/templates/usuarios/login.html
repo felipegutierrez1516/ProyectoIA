@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso - Universidad Católica del Norte</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_login.css' %}">
+</head>
+<body>
+    <div class="contenedor-login">
+        <div class="login-formulario">
+            <h1>Universidad Católica del Norte</h1>
+            <h2>Acceso a Casos Clínicos</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                <label for="username">Nombre de usuario</label>
+                <input type="text" name="username" placeholder="ej: felipe.gutierrez03@alumnos.ucn.cl" required>
+
+                <label for="password">Contraseña</label>
+                <input type="password" name="password" required>
+
+                <button type="submit">Acceder</button>
+
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
+            </form>
+
+            <div class="acciones-extra">
+                <a href="{% url 'registro' %}" class="boton-secundario">¿No tienes cuenta? Regístrate</a>
+                <a href="#">¿Olvidaste tu contraseña?</a>
+            </div>
+        </div>
+
+        <div class="login-banner">
+            <!-- Puedes agregar un logo institucional aquí -->
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
+        <a href="#">English</a>
+    </footer>
+</body>
+</html>

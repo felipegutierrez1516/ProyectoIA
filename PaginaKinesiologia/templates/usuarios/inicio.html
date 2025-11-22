@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Casos de Pacientes - UCN</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Universidad Católica del Norte</h1>
+        <p>Casos de Pacientes</p>
+    </header>
+
+    <main class="contenedor-principal">
+        <aside class="barra-lateral">
+            {% if cursos_inscritos %}
+                <h3>Cursos Disponibles</h3>
+                <ul>
+                    {% for curso in cursos_inscritos %}
+                        <li><a href="{% url 'ver_casos' curso.id %}">{{ curso.nombre }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No estás inscrito en ningún curso.</p>
+                <form method="POST" action="{% url 'inscribirse' %}">
+                    {% csrf_token %}
+                    <button type="submit">Inscribirse</button>
+                </form>
+            {% endif %}
+        </aside>
+
+        <section class="contenido-principal">
+            <h2>Bienvenido, {{ estudiante.perfil.user.first_name }}</h2>
+            <p>Selecciona un curso para acceder a los casos clínicos disponibles.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
+        <a href="#">English</a>
+    </footer>
+</body>
+</html>

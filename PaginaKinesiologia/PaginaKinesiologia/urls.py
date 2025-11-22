@@ -16,19 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
-from django.views.generic import TemplateView
+from applications.usuarios.views import redireccion_inicio
 
 urlpatterns = [
+    path('', redireccion_inicio),
     path('admin/', admin.site.urls),
-
-    # Redirige la raíz "/" al login
-    path('', lambda request: redirect('login/')),
-
-    # Usa las vistas de autenticación de Django
-    path('login/', TemplateView.as_view(template_name='registration/login.html'), name='login'),
-
-    # Incluye tus rutas de la app Inicio
-    path('inicio/', include('applications.Inicio.urls')),
+    path('usuarios/', include('applications.usuarios.urls')),
 ]
 

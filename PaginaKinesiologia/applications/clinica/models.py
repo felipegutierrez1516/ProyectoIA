@@ -1,5 +1,5 @@
 from django.db import models
-from applications.clinica.models import Categoria_Clinica
+from applications.cursos.models import Categoria_Clinica
 
 # Create your models here.
 
