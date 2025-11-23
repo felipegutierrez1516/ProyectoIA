@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnóstico - {{ paciente.nombre }}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+    <style>
+        body { font-family: 'Segoe UI'; background-color: #f9f9f9; padding: 40px; }
+        .contenedor { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
+        h2 { color: #002b5c; }
+        textarea { width: 100%; padding: 10px; border-radius: 6px; margin-top: 10px; }
+        .botones { margin-top: 20px; display: flex; gap: 10px; }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .enviar { background-color: #28a745; color: white; }
+        .resumen { background-color: #17a2b8; color: white; }
+        .volver { background-color: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h2>Diagnóstico - {{ paciente.nombre }}</h2>
+        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+        <p><strong>Tiempo total:</strong> {{ tiempo_total }}</p>
+        <p><strong>Respuestas correctas:</strong> {{ correctas }}/{{ total }}</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <label for="diagnostico">Escribe tu diagnóstico:</label>
+            <textarea name="diagnostico" rows="6" required></textarea>
+
+            <div class="botones">
+                <button type="submit" class="enviar">Enviar al docente</button>
+                <button type="button" class="resumen" onclick="alert('Resumen:\nPaciente: {{ paciente.nombre }}\nEdad: {{ paciente.edad }}\nCorrectas: {{ correctas }}/{{ total }}\nTiempo: {{ tiempo_total }}')">Ver resumen</button>
+                <button type="button" class="volver" onclick="window.location.href='/evaluar/{{ paciente.id }}/examen_fisico/'">Retroceder</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -85,13 +85,17 @@ def registro_view(request):
 from applications.usuarios.models import Estudiante
 from applications.cursos.models import Curso
 from applications.inscripciones.models import Solicitud_Inscripcion
+from applications.clinica.models import Caso  # Asegúrate de tener esta importación
 
 def inicio_estudiante(request):
     estudiante = Estudiante.objects.get(perfil__user=request.user)
     solicitudes = Solicitud_Inscripcion.objects.filter(estudiante=estudiante, estado='aceptada')
     cursos_inscritos = [s.curso for s in solicitudes]
 
+    casos = Caso.objects.filter(curso__in=cursos_inscritos, estado='Activo') if cursos_inscritos else []
+
     return render(request, 'usuarios/inicio.html', {
         'estudiante': estudiante,
-        'cursos_inscritos': cursos_inscritos
+        'cursos_inscritos': cursos_inscritos,
+        'casos': casos
     })

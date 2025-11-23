@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Motivo de Consulta - {{ paciente.nombre }}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header.barra-superior {
+            background-color: #002b5c;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-ucn {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-ucn img {
+            height: 40px;
+        }
+
+        main.contenido-principal {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            color: #002b5c;
+            margin-bottom: 10px;
+        }
+
+        .lista-preguntas {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+
+        .pregunta-item {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .pregunta-item:hover {
+            background-color: #eef2f7;
+        }
+
+        .pregunta-item.incorrecta {
+            background-color: #ffe0e0;
+            border-left: 5px solid red;
+        }
+
+        .respuesta {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .justificacion {
+            color: red;
+            font-style: italic;
+        }
+
+        .boton-avanzar {
+            margin-top: 15px;
+        }
+
+        .boton-avanzar button {
+            background-color: #002b5c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .boton-avanzar button:hover {
+            background-color: #004080;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #eee;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+    </header>
+
+    <main class="contenido-principal">
+        <h2>Motivo de Consulta - {{ paciente.nombre }}</h2>
+        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+
+        <ul class="lista-preguntas">
+            {% for pregunta in preguntas %}
+                <li class="pregunta-item" onclick="evaluarPregunta(this, {{ pregunta.es_correcta|yesno:'true,false'|safe }})">
+                    <div class="pregunta-texto">
+                        <strong>{{ pregunta.pregunta }}</strong>
+                    </div>
+                    <div class="respuesta" style="display:none;">
+                        <p><strong>Respuesta:</strong> {{ pregunta.respuesta }}</p>
+                        {% if not pregunta.es_correcta %}
+                            <p class="justificacion"><strong>Justificación:</strong> {{ pregunta.justificacion_error }}</p>
+                        {% endif %}
+                        {% if pregunta.es_correcta %}
+                            <div class="boton-avanzar">
+                                <button onclick="window.location.href='{% url 'etapa_sintomas' paciente.id %}'">Avanzar a etapa de síntomas</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+
+    <footer>
+        <p>© 2025 Universidad Católica del Norte</p>
+    </footer>
+
+    <script>
+        function evaluarPregunta(elemento, esCorrecta) {
+            const respuesta = elemento.querySelector('.respuesta');
+            const yaVisible = respuesta.style.display === 'block';
+
+            // Ocultar si ya está visible
+            if (yaVisible) {
+                respuesta.style.display = 'none';
+                elemento.classList.remove('incorrecta');
+                return;
+            }
+
+            // Mostrar respuesta
+            respuesta.style.display = 'block';
+
+            // Marcar incorrecta si corresponde
+            if (!esCorrecta) {
+                elemento.classList.add('incorrecta');
+            }
+        }
+    </script>
+</body>
+</html>

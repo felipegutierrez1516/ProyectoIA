@@ -24,12 +24,3 @@ class Curso(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nombre}"
-
-
-class Categoria_Clinica(models.Model):
-    nombre = models.CharField(max_length=150)
-    descripcion = models.TextField()
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.id} - {self.nombre}"

@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sala de Espera - {{ caso.titulo }}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+    <style>
+        .grid-pacientes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .paciente-card {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-left: 6px solid #002b5c;
+            padding: 15px;
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .paciente-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .paciente-nombre {
+            font-weight: bold;
+            color: #002b5c;
+            margin-bottom: 5px;
+        }
+
+        .paciente-edad {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .boton-secundario {
+            margin-top: 30px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            color: #002b5c;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .boton-secundario:hover {
+            background-color: #d0d0d0;
+        }
+
+        .avatar {
+            position: absolute;
+            bottom: 140px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(0,43,92,0.8);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar:hover {
+            transform: scale(1.2);
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 50px;
+            left: -30px;
+            background-color: #002b5c;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+            white-space: nowrap;
+        }
+
+        .avatar:hover .tooltip {
+            display: block;
+        }
+
+        .sala-visual {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 400px;
+            margin: 0 auto;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+
+    </style>
+</head>
+<body>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+        <div class="usuario-icono">
+            <img src="{% static 'img/icono_user.png' %}" alt="Usuario">
+        </div>
+    </header>
+
+    <div class="contenedor-principal">
+        <aside class="barra-lateral">
+            {% if casos %}
+                <h4>Casos Clínicos</h4>
+                <ul>
+                    {% for caso in casos %}
+                        <li>
+                            <a href="{% url 'sala_espera' caso.id %}">{{ caso.titulo }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </aside>
+
+        <main class="contenido-principal">
+            <h2>Sala de Espera - {{ caso.titulo }}</h2>
+            <p>Selecciona un paciente para comenzar la evaluación médica.</p>
+
+            <div class="sala-visual" style="background-image: url('{% static 'img/sala_espera.png' %}');">
+                {% for paciente in pacientes %}
+                    {% if forloop.counter == 1 %}
+                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 150px;">
+                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        </a>
+                    {% elif forloop.counter == 2 %}
+                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 320px;">
+                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        </a>
+                    {% elif forloop.counter == 3 %}
+                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 490px;">
+                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        </a>
+                    {% elif forloop.counter == 4 %}
+                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 660px;">
+                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        </a>
+                    {% elif forloop.counter == 5 %}
+                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 830px;">
+                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+
+
+            <a href="{% url 'inicio_estudiante' %}" class="boton-secundario">Volver al inicio</a>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2025 Universidad Católica del Norte</p>
+        <a href="#">English</a>
+    </footer>
+</body>
+</html>

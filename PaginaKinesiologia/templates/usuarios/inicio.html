@@ -1,41 +1,51 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Casos de Pacientes - UCN</title>
-    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
 </head>
 <body>
-    <header>
-        <h1>Universidad Católica del Norte</h1>
-        <p>Casos de Pacientes</p>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+        <div class="usuario-icono">
+            <img src="{% static 'img/icono_user.png' %}" alt="Usuario">
+        </div>
     </header>
 
-    <main class="contenedor-principal">
+    <div class="contenedor-principal">
         <aside class="barra-lateral">
-            {% if cursos_inscritos %}
-                <h3>Cursos Disponibles</h3>
+            {% if casos %}
+                <h4>Casos Clínicos</h4>
                 <ul>
-                    {% for curso in cursos_inscritos %}
-                        <li><a href="{% url 'ver_casos' curso.id %}">{{ curso.nombre }}</a></li>
+                    {% for caso in casos %}
+                        <li>
+                            <a href="{% url 'sala_espera' caso.id %}">{{ caso.titulo }}</a>
+                        </li>
                     {% endfor %}
                 </ul>
-            {% else %}
-                <p>No estás inscrito en ningún curso.</p>
-                <form method="POST" action="{% url 'inscribirse' %}">
-                    {% csrf_token %}
-                    <button type="submit">Inscribirse</button>
-                </form>
             {% endif %}
         </aside>
 
-        <section class="contenido-principal">
+
+        <main class="contenido-principal">
             <h2>Bienvenido, {{ estudiante.perfil.user.first_name }}</h2>
-            <p>Selecciona un curso para acceder a los casos clínicos disponibles.</p>
-        </section>
-    </main>
+            <p>Esta plataforma te permite acceder a casos clínicos simulados para reforzar tu aprendizaje en evaluación y tratamiento kinésico.</p>
+
+            {% if cursos_inscritos %}
+                <p>Ya estás inscrito en el curso <strong>{{ cursos_inscritos.0.nombre }}</strong>. Los casos clínicos disponibles aparecen en la barra lateral.</p>
+            {% else %}
+                <p class="alerta">No estás inscrito en ningún curso. Puedes revisar los cursos disponibles para solicitar inscripción.</p>
+                <a href="{% url 'cursos_disponibles' %}" class="boton-secundario">Ver cursos disponibles</a>
+            {% endif %}
+
+
+        </main>
+    </div>
 
     <footer>
         <p>Copyright © 2025 UCN Todos los derechos reservados</p>

@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Síntomas - {{ paciente.nombre }}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+    <style>
+        .video-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        iframe {
+            width: 80%;
+            max-width: 800px;
+            height: 450px;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .botones-control {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .boton-control {
+            padding: 10px 20px;
+            background-color: #002b5c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .boton-control:hover {
+            background-color: #004080;
+        }
+    </style>
+</head>
+<body>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+    </header>
+
+    <main class="contenido-principal">
+        <h2>Etapa de Síntomas - {{ paciente.nombre }}</h2>
+        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+
+        <div class="video-container">
+            {% if video_id %}
+                <iframe src="https://www.youtube.com/embed/{{ video_id }}"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+            {% else %}
+                <p>No hay video disponible para esta etapa.</p>
+            {% endif %}
+        </div>
+
+        <div class="botones-control">
+            <button class="boton-control" onclick="window.history.back()">Regresar</button>
+            <button class="boton-control" onclick="toggleVideo()">Pausar/Reproducir</button>
+            <button class="boton-control" onclick="window.location.href='{% url 'preguntas_sintomas' paciente.id %}'">Avanzar a preguntas</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 Universidad Católica del Norte</p>
+    </footer>
+</body>
+</html>

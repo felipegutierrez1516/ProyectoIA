@@ -5,4 +5,3 @@ from .models import *
 
 admin.site.register(Aprendizaje_Esperado)
 admin.site.register(Curso)
-admin.site.register(Categoria_Clinica)

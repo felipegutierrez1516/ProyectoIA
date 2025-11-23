@@ -1,0 +1,184 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Examen Físico - {{ paciente.nombre }}</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header.barra-superior {
+            background-color: #002b5c;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-ucn img {
+            height: 40px;
+        }
+
+        main.contenido-principal {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            color: #002b5c;
+            margin-bottom: 10px;
+        }
+
+        .imagen-cuerpo {
+            position: relative;
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        .imagen-cuerpo img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .zona-interactiva {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 123, 255, 0.3);
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .zona-interactiva:hover {
+            background-color: rgba(0, 123, 255, 0.6);
+        }
+
+        #feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #eef2f7;
+        }
+
+        .boton-avanzar button {
+            background-color: #002b5c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .boton-avanzar button:hover {
+            background-color: #004080;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #eee;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
+        .resultado-evaluacion {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f2f2f2;
+            border-left: 6px solid #ccc;
+        }
+
+        .resultado-evaluacion.correcta {
+            border-left-color: #28a745;
+            color: #28a745;
+        }
+
+        .resultado-evaluacion.incorrecta {
+            border-left-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .boton-avanzar button {
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .boton-avanzar button:hover {
+            background-color: #218838;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+    </header>
+
+    <main class="contenido-principal">
+        <h2>Examen Físico - {{ paciente.nombre }}</h2>
+        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+
+        <div class="imagen-cuerpo">
+            <img src="{% static 'img/cuerpo_frontal.png' %}" alt="Cuerpo humano">
+            {% for parte in partes %}
+                <div class="zona-interactiva"
+                     style="left:{{ parte.left }}px; top:{{ parte.top }}px;"
+                     title="{{ parte.nombre }}"
+                     onclick="evaluarParte('{{ parte.nombre }}', {{ parte.correcta|yesno:'true,false'|safe }}, '{{ parte.descripcion|escapejs }}')">
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="feedback"></div>
+    </main>
+
+    <footer>
+        <p>© 2025 Universidad Católica del Norte</p>
+    </footer>
+
+    <script>
+        function evaluarParte(nombre, esCorrecta, descripcion) {
+            const feedback = document.getElementById('feedback');
+            const clase = esCorrecta ? 'correcta' : 'incorrecta';
+            const mensaje = esCorrecta
+                ? '¡Correcto! Puedes avanzar al diagnóstico.'
+                : 'Esta no es la zona indicada. Intenta nuevamente.';
+
+            feedback.innerHTML = `
+                <div class="resultado-evaluacion ${clase}">
+                    <h3>${nombre}</h3>
+                    <p>${descripcion}</p>
+                    <p>${mensaje}</p>
+                    ${esCorrecta ? `
+                        <div class="boton-avanzar">
+                            <button onclick="window.location.href='/evaluar/{{ paciente.id }}/diagnostico/'">Avanzar al diagnóstico</button>
+                        </div>` : ''}
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+</html>

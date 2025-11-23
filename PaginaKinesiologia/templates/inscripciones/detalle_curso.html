@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Curso - UCN</title>
+    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
+</head>
+<body>
+    <header class="barra-superior">
+        <div class="logo-ucn">
+            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
+            <span>Universidad Católica del Norte</span>
+        </div>
+        <div class="usuario-icono">
+            <img src="{% static 'img/icono_user.png' %}" alt="Usuario">
+        </div>
+    </header>
+
+    <div class="contenedor-principal">
+        <aside class="barra-lateral">
+            <h3>Tipos de Casos</h3>
+            <ul>
+                <li>Cervical</li>
+                <li>Lumbar</li>
+                <li>Miembro Superior</li>
+                <li>Miembro Inferior</li>
+            </ul>
+        </aside>
+
+        <main class="contenido-principal">
+            <div class="tarjeta-detalle">
+                <h2>{{ curso.nombre }}</h2>
+                <p><strong>Descripción:</strong> {{ curso.descripcion }}</p>
+                <p><strong>Programa:</strong> {{ curso.programa }}</p>
+                <p><strong>Objetivo:</strong> {{ curso.objetivo }}</p>
+                <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio|date:"d/m/Y" }}</p>
+                <p><strong>Fecha de término:</strong> {{ curso.fecha_fin|date:"d/m/Y" }}</p>
+                <p><strong>Docente:</strong> {{ docente }}</p>
+
+                <form method="POST" action="{% url 'inscribirse' curso.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="boton-principal">Solicitar inscripción</button>
+                </form>
+
+                <!-- Botón para volver a cursos disponibles -->
+                <a href="{% url 'cursos_disponibles' %}" class="boton-secundario">Volver a cursos disponibles</a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
+        <a href="#">English</a>
+    </footer>
+</body>
+</html>
