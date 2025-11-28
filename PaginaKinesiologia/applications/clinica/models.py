@@ -19,8 +19,7 @@ class Paciente_Ficticio(models.Model):
     descripcion = models.TextField()
     edad = models.IntegerField()
     genero = models.CharField(max_length=50)
-    caso = models.ForeignKey(Caso, on_delete=models.CASCADE, related_name='pacientes', null=True, blank=True)    
-    docente_asignado = models.ForeignKey(Docente, on_delete=models.SET_NULL, null=True)
+    caso = models.ForeignKey(Caso, on_delete=models.CASCADE, related_name='pacientes', null=True, blank=True)
 
     def __str__(self):
         return f"{self.id} - {self.nombre}"

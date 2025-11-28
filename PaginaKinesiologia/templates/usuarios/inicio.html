@@ -43,6 +43,16 @@
                 <a href="{% url 'cursos_disponibles' %}" class="boton-secundario">Ver cursos disponibles</a>
             {% endif %}
 
+            
+            {% if messages %}
+            <div class="alert" style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 6px;">
+                {% for message in messages %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+
 
         </main>
     </div>

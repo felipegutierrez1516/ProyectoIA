@@ -69,7 +69,7 @@ form button:hover {
 .banner {
     flex: 1;
     background-color: #002b5c;
-    background-image: url('/static/img/banner_ucn.png');
+    background-image: url('/static/img/logo_UCN.png');
     background-size: cover;
     background-position: center;
 }

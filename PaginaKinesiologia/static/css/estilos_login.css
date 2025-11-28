@@ -81,7 +81,7 @@ form button:hover {
 .login-banner {
     flex: 1;
     background-color: #002b5c;
-    background-image: url('/static/img/banner_ucn.png'); /* si tienes un banner institucional */
+    background-image: url('/static/img/logo_UCN.png'); /* si tienes un banner institucional */
     background-size: cover;
     background-position: center;
 }
