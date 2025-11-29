@@ -1,184 +1,275 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Examen Físico - {{ paciente.nombre }}</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
 
-        header.barra-superior {
-            background-color: #002b5c;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+{% block title %}Examen Físico - {{ paciente.nombre }}{% endblock %}
 
-        .logo-ucn img {
-            height: 40px;
-        }
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
 
-        main.contenido-principal {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+    /* Contenedor de la Imagen */
+    /* IMPORTANTE: display: inline-block hace que el div se ajuste al tamaño de la imagen */
+    .cuerpo-container {
+        position: relative;
+        display: inline-block; 
+        max-width: 100%;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        background-color: #fff;
+        padding: 0; /* Quitamos padding para que los puntos sean precisos */
+        overflow: hidden; /* Corta cualquier punto que intente salirse */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
 
-        h2 {
-            color: #002b5c;
-            margin-bottom: 10px;
-        }
+    .cuerpo-imagen {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
 
-        .imagen-cuerpo {
-            position: relative;
-            width: 600px;
-            margin: 0 auto;
-        }
+    /* Puntos Interactivos (Hotspots) */
+    .hotspot {
+        position: absolute;
+        width: 24px; 
+        height: 24px;
+        background-color: rgba(0, 123, 255, 0.5); 
+        border: 2px solid #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        
+        /* Centra el punto en la coordenada exacta */
+        transform: translate(-50%, -50%); 
+        z-index: 10;
+    }
 
-        .imagen-cuerpo img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-        }
+    .hotspot:hover {
+        background-color: #007bff;
+        transform: translate(-50%, -50%) scale(1.3);
+        z-index: 20;
+    }
+    
+    /* Animación de pulso */
+    .hotspot::after {
+        content: '';
+        position: absolute;
+        top: -4px; left: -4px; right: -4px; bottom: -4px;
+        border: 2px solid rgba(0, 123, 255, 0.5);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
 
-        .zona-interactiva {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(0, 123, 255, 0.3);
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(2); opacity: 0; }
+    }
 
-        .zona-interactiva:hover {
-            background-color: rgba(0, 123, 255, 0.6);
-        }
+    /* Feedback */
+    #feedback {
+        min-height: 120px;
+    }
 
-        #feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #eef2f7;
-        }
+    .feedback-card {
+        border-radius: 8px;
+        padding: 20px;
+        border-left: 5px solid transparent;
+        animation: fadeIn 0.4s ease;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
 
-        .boton-avanzar button {
-            background-color: #002b5c;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    .feedback-card.correcta {
+        background-color: #e8f5e9;
+        border-left-color: #2e7d32;
+        color: #1b5e20;
+    }
 
-        .boton-avanzar button:hover {
-            background-color: #004080;
-        }
+    .feedback-card.incorrecta {
+        background-color: #ffebee;
+        border-left-color: #c62828;
+        color: #b71c1c;
+    }
 
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #eee;
-            margin-top: 40px;
-            font-size: 14px;
-        }
+    /* Botones */
+    .btn-siguiente {
+        background-color: #003057;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 25px;
+        font-weight: 600;
+        transition: all 0.3s;
+        width: 100%; 
+    }
+    .btn-siguiente:hover {
+        background-color: #002240;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 48, 87, 0.2);
+    }
 
-        .resultado-evaluacion {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f2f2f2;
-            border-left: 6px solid #ccc;
-        }
+    .btn-volver {
+        border-radius: 8px;
+        padding: 8px 25px;
+        font-weight: 500;
+        border: 1px solid #6c757d; 
+    }
+    .btn-volver:hover { background-color: #e2e6ea; color: #333; }
 
-        .resultado-evaluacion.correcta {
-            border-left-color: #28a745;
-            color: #28a745;
-        }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
 
-        .resultado-evaluacion.incorrecta {
-            border-left-color: #dc3545;
-            color: #dc3545;
-        }
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-10 col-lg-9">
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'etapa_sintomas' paciente.id %}" class="text-decoration-none text-muted">Síntomas</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'preguntas_sintomas' paciente.id %}" class="text-decoration-none text-muted">Interrogatorio</a></li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Examen Físico</li>
+            </ol>
+        </nav>
 
-        .boton-avanzar button {
-            margin-top: 10px;
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-avanzar button:hover {
-            background-color: #218838;
-        }
-
-    </style>
-</head>
-<body>
-    <header class="barra-superior">
-        <div class="logo-ucn">
-            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
-            <span>Universidad Católica del Norte</span>
-        </div>
-    </header>
-
-    <main class="contenido-principal">
-        <h2>Examen Físico - {{ paciente.nombre }}</h2>
-        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
-
-        <div class="imagen-cuerpo">
-            <img src="{% static 'img/cuerpo_frontal.png' %}" alt="Cuerpo humano">
-            {% for parte in partes %}
-                <div class="zona-interactiva"
-                     style="left:{{ parte.left }}px; top:{{ parte.top }}px;"
-                     title="{{ parte.nombre }}"
-                     onclick="evaluarParte('{{ parte.nombre }}', {{ parte.correcta|yesno:'true,false'|safe }}, '{{ parte.descripcion|escapejs }}')">
+        <div class="card shadow border-0 rounded-3 bg-white">
+            <div class="card-body p-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 text-ucn me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-person-bounding-box fs-3"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-ucn mb-0">Examen Físico</h4>
+                            <span class="text-muted small">
+                                Paciente: {{ paciente.nombre }} | {{ paciente.edad }} años
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark border p-2 fw-normal" style="font-size: 0.9em;">
+                            <i class="bi bi-crosshair me-1 text-muted"></i>
+                            <span class="text-secondary">Aciertos:</span>
+                            <span id="contadorTexto" class="fw-bold text-dark ms-1">0/0</span>
+                        </span>
+                    </div>
                 </div>
-            {% endfor %}
-        </div>
 
-        <div id="feedback"></div>
-    </main>
-
-    <footer>
-        <p>© 2025 Universidad Católica del Norte</p>
-    </footer>
-
-    <script>
-        function evaluarParte(nombre, esCorrecta, descripcion) {
-            const feedback = document.getElementById('feedback');
-            const clase = esCorrecta ? 'correcta' : 'incorrecta';
-            const mensaje = esCorrecta
-                ? '¡Correcto! Puedes avanzar al diagnóstico.'
-                : 'Esta no es la zona indicada. Intenta nuevamente.';
-
-            feedback.innerHTML = `
-                <div class="resultado-evaluacion ${clase}">
-                    <h3>${nombre}</h3>
-                    <p>${descripcion}</p>
-                    <p>${mensaje}</p>
-                    ${esCorrecta ? `
-                        <div class="boton-avanzar">
-                            <button onclick="window.location.href='/evaluaciones/evaluar/{{ paciente.id }}/diagnostico/'">Avanzar al diagnóstico</button>
-                        </div>` : ''}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-light border-start border-4 border-info shadow-sm mb-4">
+                            <i class="bi bi-info-circle-fill text-info me-2"></i>
+                            <strong>Instrucción:</strong> Haz clic en los puntos azules sobre la imagen para evaluar las zonas corporales.
+                        </div>
+                    </div>
                 </div>
-            `;
-        }
-    </script>
 
-</body>
-</html>
+                <div class="row g-4">
+                    <div class="col-md-6 text-center">
+                        <div class="cuerpo-container">
+                            <img src="{% static 'img/cuerpo_frontal.png' %}" alt="Esquema Corporal" class="cuerpo-imagen">
+                            
+                            {% for parte in partes %}
+                                <div class="hotspot"
+                                     style="left:{{ parte.left }}%; top:{{ parte.top }}%;" 
+                                     data-bs-toggle="tooltip" 
+                                     title="{{ parte.nombre }}"
+                                     onclick="evaluarParte('{{ parte.nombre }}', '{{ parte.correcta|yesno:'true,false' }}', '{{ parte.descripcion|escapejs }}')">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 d-flex flex-column">
+                        <h6 class="fw-bold text-secondary mb-3 small text-uppercase">
+                            <i class="bi bi-clipboard-data me-1"></i> Resultado de la Evaluación
+                        </h6>
+                        
+                        <div id="feedback" class="flex-grow-1">
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-4 border rounded bg-light">
+                                <i class="bi bi-hand-index-thumb fs-1 mb-2 opacity-25"></i>
+                                <p class="text-center small m-0">Selecciona una zona en la imagen para ver los hallazgos clínicos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-start pt-4 mt-3 border-top">
+                    <a href="{% url 'preguntas_sintomas' paciente.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
+                        <i class="bi bi-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% url 'vista_diagnostico' paciente.id as url_diagnostico %}
+
+<script>
+    let intentos = 0;
+    let aciertos = 0;
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    function evaluarParte(nombre, esCorrecta, descripcion) {
+        const feedbackContainer = document.getElementById('feedback');
+        
+        if (aciertos === 0) {
+            intentos++;
+        }
+
+        const isCorrect = (esCorrecta === 'true');
+        const claseEstado = isCorrect ? 'correcta' : 'incorrecta';
+        const icono = isCorrect ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+        const tituloEstado = isCorrect ? 'Hallazgo Relevante' : 'Sin Hallazgos';
+        
+        if (isCorrect && aciertos === 0) {
+            aciertos = 1; 
+        }
+
+        document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
+
+        const mensajeAccion = isCorrect 
+            ? `<div class="mt-4 pt-3 border-top border-success-subtle">
+                 <p class="small fw-bold text-success mb-2">Has encontrado el hallazgo principal.</p>
+                 <button onclick="window.location.href='{{ url_diagnostico }}'" class="btn btn-siguiente shadow-sm">
+                    Ir al Diagnóstico <i class="bi bi-arrow-right ms-2"></i>
+                 </button>
+               </div>` 
+            : `<div class="mt-3 text-muted small">
+                 <i class="bi bi-arrow-counterclockwise me-1"></i>Esta zona no presenta anomalías relevantes. Sigue buscando.
+               </div>`;
+
+        const htmlContent = `
+            <div class="feedback-card ${claseEstado} shadow-sm h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi ${icono} fs-4 me-2"></i>
+                    <h5 class="fw-bold mb-0">${nombre}</h5>
+                </div>
+                <p class="mb-3 text-dark">${descripcion}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-white text-dark border shadow-sm">${tituloEstado}</span>
+                </div>
+                ${mensajeAccion}
+            </div>
+        `;
+
+        feedbackContainer.innerHTML = htmlContent;
+    }
+</script>
+{% endblock %}

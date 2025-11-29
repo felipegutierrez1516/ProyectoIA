@@ -1,170 +1,191 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Sala de Espera - {{ caso.titulo }}</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
-    <style>
-        .grid-pacientes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
 
-        .paciente-card {
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-left: 6px solid #002b5c;
-            padding: 15px;
-            border-radius: 8px;
-            transition: box-shadow 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
+{% block title %}Sala de Espera - {{ caso.titulo }}{% endblock %}
 
-        .paciente-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
 
-        .paciente-nombre {
-            font-weight: bold;
-            color: #002b5c;
-            margin-bottom: 5px;
-        }
+    /* Contenedor de la Imagen de Sala */
+    .sala-container {
+        position: relative;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        background-color: #f0f0f0; /* Fondo por si la imagen tarda en cargar */
+    }
 
-        .paciente-edad {
-            font-size: 14px;
-            color: #555;
-        }
+    .sala-imagen {
+        width: 100%;
+        height: auto;
+        display: block;
+        min-height: 400px; /* Altura mínima para asegurar espacio */
+        object-fit: cover;
+    }
 
-        .boton-secundario {
-            margin-top: 30px;
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #e0e0e0;
-            color: #002b5c;
-            font-weight: bold;
-            border-radius: 5px;
-            text-decoration: none;
-        }
+    /* Marcadores de Pacientes (Avatares) */
+    .paciente-marker {
+        position: absolute;
+        /* Ajustamos el TOP para que parezca que están en las sillas. 
+           Ajusta este % según tu imagen real de fondo */
+        top: 55%; 
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #003057;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid white;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        z-index: 10;
+        text-decoration: none;
+    }
 
-        .boton-secundario:hover {
-            background-color: #d0d0d0;
-        }
+    /* Efecto Hover y Pulso */
+    .paciente-marker:hover {
+        transform: scale(1.15) translateY(-5px);
+        background-color: #004a87;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    }
+    
+    /* Animación de pulso para indicar que se puede hacer clic */
+    .paciente-marker::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid #003057;
+        animation: pulse 2s infinite;
+        opacity: 0;
+    }
 
-        .avatar {
-            position: absolute;
-            bottom: 140px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: rgba(0,43,92,0.8);
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
 
-        .avatar:hover {
-            transform: scale(1.2);
-        }
+    /* Sidebar lista de casos */
+    .list-group-item-active-custom {
+        background-color: #e3f2fd;
+        color: #003057;
+        border-left: 4px solid #003057;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
 
-        .tooltip {
-            position: absolute;
-            bottom: 50px;
-            left: -30px;
-            background-color: #002b5c;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            display: none;
-            white-space: nowrap;
-        }
-
-        .avatar:hover .tooltip {
-            display: block;
-        }
-
-        .sala-visual {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            height: 400px;
-            margin: 0 auto;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
-
-    </style>
-</head>
-<body>
-    <header class="barra-superior">
-        <div class="logo-ucn">
-            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
-            <span>Universidad Católica del Norte</span>
-        </div>
-        <div class="usuario-icono">
-            <img src="{% static 'img/icono_user.png' %}" alt="Usuario">
-        </div>
-    </header>
-
-    <div class="contenedor-principal">
-        <aside class="barra-lateral">
-            {% if casos %}
-                <h4>Casos Clínicos</h4>
-                <ul>
-                    {% for caso in casos %}
-                        <li>
-                            <a href="{% url 'sala_espera' caso.id %}">{{ caso.titulo }}</a>
-                        </li>
+{% block content %}
+<div class="row g-4">
+    
+    <aside class="col-md-3">
+        <div class="card shadow border-0 rounded-3">
+            <div class="card-header bg-ucn py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-list-task me-2"></i>Casos Disponibles</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                {% if casos %}
+                    {% for c in casos %}
+                        <a href="{% url 'sala_espera' c.id %}" 
+                           class="list-group-item list-group-item-action py-3 {% if c.id == caso.id %}list-group-item-active-custom{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ c.titulo }}</span>
+                                {% if c.id == caso.id %}
+                                    <i class="bi bi-geo-alt-fill text-ucn"></i>
+                                {% endif %}
+                            </div>
+                        </a>
                     {% endfor %}
-                </ul>
-            {% endif %}
-        </aside>
+                {% else %}
+                    <div class="p-3 text-muted small">No hay otros casos disponibles.</div>
+                {% endif %}
+            </div>
+        </div>
+    </aside>
 
-        <main class="contenido-principal">
-            <h2>Sala de Espera - {{ caso.titulo }}</h2>
-            <p>Selecciona un paciente para comenzar la evaluación médica.</p>
+    <main class="col-md-9">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 small">
+                        <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                        <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Sala de Espera</li>
+                    </ol>
+                </nav>
+            </div>
+            <span class="badge bg-warning text-dark shadow-sm px-3 py-2 rounded-pill">
+                <i class="bi bi-people-fill me-1"></i> Pacientes en espera
+            </span>
+        </div>
 
-            <div class="sala-visual" style="background-image: url('{% static 'img/sala_espera.png' %}');">
+        <div class="alert alert-light border-start border-4 border-info shadow-sm mb-3">
+            <i class="bi bi-info-circle-fill text-info me-2"></i>
+            <span class="fw-semibold text-dark">Selecciona un paciente.</span> 
+            Haz clic sobre uno de los iconos en la imagen para ver sus datos y comenzar la evaluación.
+        </div>
+
+        <div class="card shadow border-0 p-2 rounded-3">
+            <div class="sala-container">
+                <img src="{% static 'img/sala_espera.png' %}" alt="Sala de Espera" class="sala-imagen">
+                
                 {% for paciente in pacientes %}
+                    
                     {% if forloop.counter == 1 %}
-                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 150px;">
-                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 15%;" 
+                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                            <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% elif forloop.counter == 2 %}
-                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 320px;">
-                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 32%;"
+                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                            <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% elif forloop.counter == 3 %}
-                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 490px;">
-                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 49%;"
+                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                             <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% elif forloop.counter == 4 %}
-                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 660px;">
-                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 66%;"
+                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                             <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% elif forloop.counter == 5 %}
-                        <a href="{% url 'evaluar_paciente' paciente.id %}" class="avatar" style="left: 830px;">
-                            <div class="tooltip">{{ paciente.nombre }}<br>{{ paciente.edad }} años</div>
+                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 83%;"
+                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                             <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% endif %}
+
                 {% endfor %}
-
             </div>
+        </div>
 
+        <div class="mt-3 mb-5">
+            <a href="{% url 'inicio_estudiante' %}" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+            </a>
+        </div>
 
-            <a href="{% url 'inicio_estudiante' %}" class="boton-secundario">Volver al inicio</a>
-        </main>
-    </div>
+    </main>
+</div>
+{% endblock %}
 
-    <footer>
-        <p>© 2025 Universidad Católica del Norte</p>
-        <a href="#">English</a>
-    </footer>
-</body>
-</html>
+{% block extra_js %}
+<script>
+    // Inicializar Tooltips de Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

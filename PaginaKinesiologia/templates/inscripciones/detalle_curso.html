@@ -1,57 +1,159 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Detalle del Curso - UCN</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
-</head>
-<body>
-    <header class="barra-superior">
-        <div class="logo-ucn">
-            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
-            <span>Universidad Católica del Norte</span>
+
+{% block title %}Detalle del Curso - {{ curso.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
+    
+    /* Cajas de información */
+    .info-box {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        height: 100%;
+        border-left: 3px solid #003057; 
+        transition: transform 0.2s;
+    }
+    .info-box:hover {
+        transform: translateY(-2px);
+        background-color: #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    
+    /* Iconos */
+    .icon-wrapper {
+        width: 32px;
+        height: 32px;
+        background-color: rgba(0, 48, 87, 0.1);
+        color: #003057;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    /* ESTILO BOTÓN INSCRIPCIÓN CORREGIDO */
+    .btn-inscripcion {
+        background-color: #003057;
+        color: white;
+        font-weight: 600;
+        /* Padding ajustado para coincidir en altura con el botón 'Volver' */
+        padding: 6px 20px; 
+        /* Cambio de 50px a 6px para que sea rectangular con bordes redondeados */
+        border-radius: 6px; 
+        font-size: 1rem;
+        transition: all 0.3s;
+        border: 1px solid #003057; /* Para igualar el borde del btn-outline */
+    }
+    .btn-inscripcion:hover {
+        background-color: #002240;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 48, 87, 0.2);
+        transform: scale(1.02);
+    }
+
+    /* Textos */
+    .titulo-seccion { font-size: 0.8rem; letter-spacing: 0.5px; }
+    .texto-desc { font-size: 0.95rem; line-height: 1.6; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-10 col-xl-9">
+        
+        <div class="mb-3"> 
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small"> 
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'cursos_disponibles' %}" class="text-decoration-none text-muted">Cursos</a></li>
+                    <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Detalle</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-ucn mb-0">{{ curso.nombre }}</h2> 
         </div>
-        <div class="usuario-icono">
-            <img src="{% static 'img/icono_user.png' %}" alt="Usuario">
-        </div>
-    </header>
 
-    <div class="contenedor-principal">
-        <aside class="barra-lateral">
-            <h3>Tipos de Casos</h3>
-            <ul>
-                <li>Cervical</li>
-                <li>Lumbar</li>
-                <li>Miembro Superior</li>
-                <li>Miembro Inferior</li>
-            </ul>
-        </aside>
+        <div class="card shadow border-0 rounded-3 overflow-hidden">
+            
+            <div class="bg-ucn py-1"></div> 
 
-        <main class="contenido-principal">
-            <div class="tarjeta-detalle">
-                <h2>{{ curso.nombre }}</h2>
-                <p><strong>Descripción:</strong> {{ curso.descripcion }}</p>
-                <p><strong>Programa:</strong> {{ curso.programa }}</p>
-                <p><strong>Objetivo:</strong> {{ curso.objetivo }}</p>
-                <p><strong>Fecha de inicio:</strong> {{ curso.fecha_inicio|date:"d/m/Y" }}</p>
-                <p><strong>Fecha de término:</strong> {{ curso.fecha_fin|date:"d/m/Y" }}</p>
-                <p><strong>Docente:</strong> {{ docente }}</p>
+            <div class="card-body p-4"> 
+                
+                <div class="mb-4">
+                    <h6 class="text-muted text-uppercase fw-bold titulo-seccion mb-2">Descripción General</h6>
+                    <p class="texto-desc text-secondary mb-0">
+                        {{ curso.descripcion }}
+                    </p>
+                </div>
 
-                <form method="POST" action="{% url 'inscribirse' curso.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="boton-principal">Solicitar inscripción</button>
-                </form>
+                <hr class="my-4 opacity-10">
 
-                <!-- Botón para volver a cursos disponibles -->
-                <a href="{% url 'cursos_disponibles' %}" class="boton-secundario">Volver a cursos disponibles</a>
+                <div class="row g-3 mb-4"> 
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-box">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-wrapper me-2"><i class="bi bi-person-video3"></i></div>
+                                <h6 class="fw-bold mb-0 text-ucn small">Docente</h6>
+                            </div>
+                            <p class="mb-0 small text-dark">{{ docente }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-box">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-wrapper me-2"><i class="bi bi-calendar-range"></i></div>
+                                <h6 class="fw-bold mb-0 text-ucn small">Fechas</h6>
+                            </div>
+                            <p class="mb-0 small text-dark" style="font-size: 0.8rem;">
+                                <strong>Inicio:</strong> {{ curso.fecha_inicio|date:"d/m/y" }}<br>
+                                <strong>Fin:</strong> {{ curso.fecha_fin|date:"d/m/y" }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-box">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-wrapper me-2"><i class="bi bi-journal-text"></i></div>
+                                <h6 class="fw-bold mb-0 text-ucn small">Programa</h6>
+                            </div>
+                            <p class="mb-0 small text-muted text-truncate">{{ curso.programa }}</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-box">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="icon-wrapper me-2"><i class="bi bi-bullseye"></i></div>
+                                <h6 class="fw-bold mb-0 text-ucn small">Objetivo</h6>
+                            </div>
+                            <p class="mb-0 small text-muted text-truncate">{{ curso.objetivo }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2">
+                    
+                    <a href="{% url 'cursos_disponibles' %}" class="btn btn-outline-secondary px-4 rounded-3">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Cursos
+                    </a>
+
+                    <form method="POST" action="{% url 'inscribirse' curso.id %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-inscripcion shadow-sm">
+                            Solicitar Inscripción <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </form>
+
+                </div>
             </div>
-        </main>
+        </div>
     </div>
-
-    <footer>
-        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
-        <a href="#">English</a>
-    </footer>
-</body>
-</html>
+</div>
+{% endblock %}

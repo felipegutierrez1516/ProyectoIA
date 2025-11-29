@@ -1,20 +1,26 @@
 from django.urls import path
-from .views import ver_casos
-from .views import detalle_caso
-from .views import sala_espera
-from .views import evaluar_paciente
-from .views import preguntas_motivo
-from .views import etapa_sintomas
-from .views import preguntas_sintomas
-from .views import examen_fisico
+from . import views
 
 urlpatterns = [
-    path('curso/<int:curso_id>/casos/', ver_casos, name='ver_casos'),
-    path('caso/<int:caso_id>/', detalle_caso, name='detalle_caso'),
-    path('caso/<int:caso_id>/sala/', sala_espera, name='sala_espera'),
-    path('evaluar/<int:paciente_id>/', evaluar_paciente, name='evaluar_paciente'),
-    path('evaluar/<int:paciente_id>/preguntas/motivo/', preguntas_motivo, name='preguntas_motivo'),
-    path('evaluar/<int:paciente_id>/sintomas/', etapa_sintomas, name='etapa_sintomas'),
-    path('evaluar/<int:paciente_id>/preguntas/sintomas/', preguntas_sintomas, name='preguntas_sintomas'),
-    path('evaluar/<int:paciente_id>/examen/', examen_fisico, name='examen_fisico'),
+    # Casos clínicos
+    path('ver_casos/<int:curso_id>/', views.ver_casos, name='ver_casos'),
+    path('detalle_caso/<int:caso_id>/', views.detalle_caso, name='detalle_caso'),
+
+    # Sala de espera
+    path('sala_espera/<int:caso_id>/', views.sala_espera, name='sala_espera'),
+
+    # Evaluación clínica
+    path('motivo-consulta/<int:paciente_id>/', views.evaluar_paciente, name='motivo_consulta'),
+
+    # Motivo de consulta
+    path('motivo/<int:paciente_id>/', views.preguntas_motivo, name='preguntas_motivo'),
+
+    # Síntomas
+    path('sintomas/<int:paciente_id>/', views.etapa_sintomas, name='etapa_sintomas'),
+    path('preguntas_sintomas/<int:paciente_id>/', views.preguntas_sintomas, name='preguntas_sintomas'),
+
+    # Examen físico
+    path('examen_fisico/<int:paciente_id>/', views.examen_fisico, name='examen_fisico'),
+    path('registrar_parte/<int:paciente_id>/', views.registrar_parte_examen_fisico, name='registrar_parte_examen_fisico'),
 ]
+

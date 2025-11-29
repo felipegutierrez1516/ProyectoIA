@@ -1,45 +1,31 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resumen de Evaluación</title>
-    <style>
-        body { font-family: 'Segoe UI'; background-color: #f4f4f4; padding: 40px; }
-        .contenedor { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
-        h2 { color: #002b5c; }
-        .resumen { margin-top: 20px; font-size: 16px; }
-        .botones { margin-top: 30px; display: flex; gap: 10px; }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .enviar { background-color: #28a745; color: white; }
-        .volver { background-color: #6c757d; color: white; }
-    </style>
-</head>
-<body>
-    <div class="contenedor">
-        <h2>Resumen de Evaluación - {{ paciente.nombre }}</h2>
-        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+{% extends 'base.html' %}
+{% block title %}Resumen de Evaluación{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="card-title">Resumen de Evaluación - {{ paciente.nombre }}</h4>
+    <p class="text-muted">Edad: {{ paciente.edad }} | Género: {{ paciente.genero }}</p>
 
-        <div class="resumen">
-            <p><strong>Motivo de consulta:</strong> {{ motivo }} correctas</p>
-            <p><strong>Síntomas:</strong> {{ sintomas }} correctas</p>
-            <p><strong>Examen físico:</strong> {{ examen }} correctas</p>
-            <p><strong>Total:</strong> {{ correctas }}/{{ total }} respuestas correctas</p>
-            <p><strong>Tiempo total:</strong> {{ tiempo_total }}</p>
-        </div>
-
-        <form method="POST">
-            {% csrf_token %}
-            <div class="botones">
-                <button type="submit" class="enviar">Enviar respuestas al docente</button>
-                <button type="button" class="volver" onclick="window.location.href='/evaluaciones/evaluar/{{ paciente.id }}/diagnostico/'">Volver al diagnóstico</button>
-            </div>
-        </form>
+    <div class="row text-center mb-3">
+      <div class="col-md-4"><div class="alert alert-secondary">Motivo: <strong>{{ motivo }}</strong></div></div>
+      <div class="col-md-4"><div class="alert alert-secondary">Síntomas: <strong>{{ sintomas }}</strong></div></div>
+      <div class="col-md-4"><div class="alert alert-secondary">Examen físico: <strong>{{ examen }}</strong></div></div>
     </div>
-</body>
-</html>
+
+    <p><span class="badge bg-primary">Total: {{ correctas }}/{{ total }}</span>
+       <span class="badge bg-info text-dark">Tiempo: {{ tiempo_total }}</span></p>
+
+    <form method="post" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success" {% if total == 0 %}disabled{% endif %}>
+        Enviar respuestas al docente
+      </button>
+    </form>
+    <a href="{% url 'vista_diagnostico' paciente.id %}" class="btn btn-outline-primary">Volver al diagnóstico</a>
+
+    {% if total == 0 %}
+      <div class="alert alert-warning mt-3">No puedes enviar aún: no hay respuestas registradas.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

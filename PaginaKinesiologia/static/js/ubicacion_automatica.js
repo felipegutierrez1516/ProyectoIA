@@ -1,25 +1,26 @@
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("Script de ubicación automática cargado");
+    console.log("Script de ubicación automática cargado (Modo Porcentajes)");
 
+    // Coordenadas en PORCENTAJES (0-100) para diseño responsivo
     const coords = {
-        cabeza: [270, 40],
-        cuello: [270, 90],
-        hombro_izquierdo: [220, 120],
-        hombro_derecho: [320, 120],
-        codo_izquierdo: [200, 180],
-        codo_derecho: [340, 180],
-        mano_izquierda: [180, 240],
-        mano_derecha: [360, 240],
-        espalda: [270, 160],
-        pecho: [270, 140],
-        abdomen: [270, 200],
-        pelvis: [270, 250],
-        muslo_izquierdo: [240, 300],
-        muslo_derecho: [300, 300],
-        rodilla_izquierda: [240, 370],
-        rodilla_derecha: [300, 370],
-        pie_izquierdo: [240, 460],
-        pie_derecho: [300, 460]
+        'cabeza': [50, 6],
+        'cuello': [50, 13],
+        'hombro_izquierdo': [32, 18],
+        'hombro_derecho': [68, 18],
+        'pecho': [50, 23],
+        'espalda': [50, 23],
+        'codo_izquierdo': [27, 29],
+        'codo_derecho': [73, 29],
+        'abdomen': [50, 34],
+        'mano_izquierda': [21, 42],
+        'mano_derecha': [79, 42],
+        'pelvis': [50, 44],
+        'muslo_izquierdo': [42, 53],
+        'muslo_derecho': [58, 53],
+        'rodilla_izquierda': [42, 69],
+        'rodilla_derecha': [58, 69],
+        'pie_izquierdo': [42, 90],
+        'pie_derecho': [58, 90]
     };
 
     function findFields() {
@@ -51,12 +52,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const [lx, ty] = coords[key];
             left.value = lx;
             top.value = ty;
-            // dispara eventos para que el admin registre cambios
+            // Disparar eventos para que Django Admin detecte el cambio
             ['input', 'change'].forEach(evt => {
                 left.dispatchEvent(new Event(evt, { bubbles: true }));
                 top.dispatchEvent(new Event(evt, { bubbles: true }));
             });
-            console.log(`Asignado: ${key} → left=${lx}, top=${ty}`);
+            console.log(`Asignado: ${key} → left=${lx}%, top=${ty}%`);
         } else {
             console.warn(`Sin coordenadas para: ${key}`);
         }
@@ -87,7 +88,4 @@ document.addEventListener('DOMContentLoaded', function () {
         const obs = new MutationObserver(() => wire());
         obs.observe(adminForm, { childList: true, subtree: true });
     }
-
-    // Hard refresh puede ser necesario si el navegador cachea estáticos
-    // Sugerencia: Ctrl+F5 si sigue sin reflejar los cambios.
 });

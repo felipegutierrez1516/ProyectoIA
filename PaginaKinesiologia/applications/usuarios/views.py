@@ -37,21 +37,19 @@ from applications.usuarios.models import Perfil, Estudiante, Docente
 
 def registro_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
         password = request.POST['password']
         email = request.POST['email'].lower()
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
-
+        username = email  # Usar el correo como nombre de usuario
+        
         # Validaciones previas
         if User.objects.filter(username=username).exists():
-            return render(request, 'usuarios/registro.html', {'error': 'Nombre de usuario ya existe'})
-        if User.objects.filter(email=email).exists():
-            return render(request, 'usuarios/registro.html', {'error': 'Correo ya registrado'})
+            return render(request, 'usuarios/registro.html', {'error': 'Este correo ya está registrado.'})
 
         # Crear usuario
         user = User.objects.create(
-            username=email,
+            username=username,
             password=make_password(password),
             email=email,
             first_name=first_name,
@@ -75,7 +73,7 @@ def registro_view(request):
         else:
             Docente.objects.get_or_create(perfil=perfil)
 
-        return redirect('/usuarios/login/')
+        return redirect('login')
 
     return render(request, 'usuarios/registro.html')
 

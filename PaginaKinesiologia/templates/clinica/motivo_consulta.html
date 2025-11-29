@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Etapa de Síntomas - {{ paciente.nombre }}{% endblock %}
+{% block title %}Motivo de Consulta - {{ paciente.nombre }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -27,7 +27,7 @@
         border: none;
     }
 
-    /* Caja de Relato (Opcional, si hay descripción en esta etapa) */
+    /* Caja de Relato */
     .relato-box {
         background-color: #f8f9fa;
         border-left: 4px solid #003057;
@@ -76,9 +76,7 @@
             <ol class="breadcrumb mb-2 small">
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Motivo</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'preguntas_motivo' paciente.id %}" class="text-decoration-none text-muted">Anamnesis</a></li>
-                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Síntomas</li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Evaluación</li>
             </ol>
         </nav>
 
@@ -87,11 +85,12 @@
                 
                 <div class="d-flex align-items-center mb-4 border-bottom pb-3">
                     <div class="bg-light rounded-circle p-2 text-ucn me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                        <i class="bi bi-activity fs-3"></i> </div>
+                        <i class="bi bi-person-fill fs-3"></i>
+                    </div>
                     <div>
-                        <h4 class="fw-bold text-ucn mb-0">Etapa de Síntomas - {{ paciente.nombre }}</h4>
+                        <h4 class="fw-bold text-ucn mb-0">{{ paciente.nombre }}</h4>
                         <span class="text-muted small">
-                            <i class="bi bi-calendar3 me-1"></i> {{ paciente.edad }} años | {{ paciente.genero }}
+                            <i class="bi bi-calendar3 me-1"></i> {{ paciente.edad }} años
                         </span>
                     </div>
                 </div>
@@ -99,14 +98,14 @@
                 <div class="alert alert-light border-start border-4 border-info shadow-sm mb-3">
                     <i class="bi bi-info-circle-fill text-info me-2"></i>
                     <span class="fw-semibold text-dark">Instrucción:</span> 
-                    Analiza la descripción de los síntomas presentados por el paciente en el siguiente video.
+                    Visualiza el siguiente video con atención para comprender el motivo de consulta del paciente.
                 </div>
 
                 <div class="video-container">
-                    {% if video_id %}
+                    {% if etapa and etapa.video %}
                         <iframe 
-                            src="https://www.youtube.com/embed/{{ video_id }}?rel=0" 
-                            title="Video de Síntomas"
+                            src="https://www.youtube.com/embed/{{ etapa.video|cut:'https://www.youtube.com/watch?v=' }}?rel=0" 
+                            title="Video de la Etapa"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                             allowfullscreen>
                         </iframe>
@@ -120,10 +119,9 @@
                     {% endif %}
                 </div>
 
-                {% if etapa.descripcion %}
                 <div class="mb-4">
                     <h6 class="fw-bold text-secondary mb-2 small text-uppercase">
-                        <i class="bi bi-chat-left-text-fill me-2"></i>Detalle de Síntomas
+                        <i class="bi bi-chat-left-text-fill me-2"></i>Relato del Paciente
                     </h6>
                     <div class="relato-box">
                         <p class="mb-0 text-secondary fst-italic">
@@ -131,15 +129,14 @@
                         </p>
                     </div>
                 </div>
-                {% endif %}
 
                 <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
                     
-                    <a href="{% url 'preguntas_motivo' paciente.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
-                        <i class="bi bi-arrow-left me-2"></i>Volver
+                    <a href="{% url 'sala_espera' paciente.caso.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
+                        <i class="bi bi-arrow-left me-2"></i>Sala de Espera
                     </a>
 
-                    <a href="{% url 'preguntas_sintomas' paciente.id %}" class="btn btn-siguiente shadow-sm">
+                    <a href="{% url 'preguntas_motivo' paciente.id %}" class="btn btn-siguiente shadow-sm">
                         Ir a Preguntas <i class="bi bi-arrow-right ms-2"></i>
                     </a>
 

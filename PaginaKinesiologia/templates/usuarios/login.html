@@ -1,47 +1,108 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Acceso - Universidad Católica del Norte</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_login.css' %}">
-</head>
-<body>
-    <div class="contenedor-login">
-        <div class="login-formulario">
-            <h1>Universidad Católica del Norte</h1>
-            <h2>Acceso a Casos Clínicos</h2>
+{% block title %}Acceso - UCN{% endblock %}
 
-            <form method="POST">
-                {% csrf_token %}
-                <label for="username">Nombre de usuario</label>
-                <input type="text" name="username" placeholder="ej: nombre.apellido@alumnos.ucn.cl" required>
+{% block extra_css %}
+<style>
+    /* 1. Columna Izquierda: AHORA ES BLANCA */
+    .bg-login-white {
+        background-color: #ffffff;
+        color: #333; /* Texto oscuro */
+    }
 
-                <label for="password">Contraseña</label>
-                <input type="password" name="password" required>
+    /* 2. Columna Derecha: IMAGEN CON TRANSPARENCIA */
+    .login-image-column {
+        background-image: url("{% static 'img/fondo_inicio.png' %}"); /* Asegúrate de que sea .png o .jpg según tu archivo */
+        background-size: cover;
+        background-position: center;
+        min-height: 100%;
+        
+        /* MÁSCARA DE DEGRADADO: hace que la imagen se desvanezca hacia la izquierda */
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 50%);
+        mask-image: linear-gradient(to right, transparent 0%, black 50%);
+    }
 
-                <button type="submit">Acceder</button>
+    /* Inputs estilo estándar (fondo gris claro) */
+    .form-control-login {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        height: 50px;
+    }
 
-                {% if error %}
-                    <p class="error">{{ error }}</p>
-                {% endif %}
-            </form>
+    /* Botón Azul UCN (porque el fondo ahora es blanco) */
+    .btn-login {
+        background-color: #003057;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .btn-login:hover {
+        background-color: #002240;
+        color: white;
+    }
 
-            <div class="acciones-extra">
-                <a href="{% url 'registro' %}" class="boton-secundario">¿No tienes cuenta? Regístrate</a>
-                <a href="#">¿Olvidaste tu contraseña?</a>
+    /* Ajuste de contenedor para ancho completo y altura */
+    .full-width-container {
+        width: 90vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -45vw;
+        margin-right: -50vw;
+        height: 70vh; /* Altura controlada */
+        overflow: hidden;
+        border-radius: 0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 full-width-container mt-0 mb-5">
+    <div class="row g-0 h-100">
+        
+        <div class="col-md-5 col-lg-4 bg-login-white d-flex align-items-center justify-content-center p-5">
+            <div style="width: 100%; max-width: 400px;">
+                <h2 class="fw-bold mb-2" style="color: #003057;">Bienvenido</h2>
+                <p class="mb-4 text-muted">Ingresa a la Plataforma de Kinesiología</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label small fw-bold text-secondary">Correo Institucional</label>
+                        <input type="text" name="username" class="form-control form-control-login" placeholder="Ej: nombre.apellido@alumnos.ucn.cl" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label small fw-bold text-secondary">Contraseña</label>
+                        <input type="password" name="password" class="form-control form-control-login" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-4">
+                        <button type="submit" class="btn btn-login btn-lg">Iniciar Sesión</button>
+                    </div>
+
+                    {% if error %}
+                        <div class="alert alert-danger d-flex align-items-center small py-2" role="alert">
+                            <div>{{ error }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'registro' %}" class="text-decoration-none fw-bold" style="color: #003057;">Crear cuenta</a>
+                        <span class="mx-2 text-muted">|</span>
+                        <a href="#" class="text-decoration-none text-muted small">Olvidé mi contraseña</a>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="login-banner">
-            <!-- Puedes agregar un logo institucional aquí -->
+        <div class="col-md-7 col-lg-8 d-none d-md-block login-image-column">
         </div>
-    </div>
 
-    <footer>
-        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
-        <a href="#">English</a>
-    </footer>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

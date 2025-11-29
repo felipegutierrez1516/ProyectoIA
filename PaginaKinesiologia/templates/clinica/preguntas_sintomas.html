@@ -1,169 +1,254 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Síntomas - {{ paciente.nombre }}</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_inicio.css' %}">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-        }
 
-        header.barra-superior {
-            background-color: #002b5c;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+{% block title %}Interrogatorio de Síntomas - {{ paciente.nombre }}{% endblock %}
 
-        .logo-ucn {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
 
-        .logo-ucn img {
-            height: 40px;
-        }
+    /* ACORDEÓN PERSONALIZADO */
+    .accordion-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px !important;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: all 0.3s;
+    }
 
-        main.contenido-principal {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+    .accordion-button {
+        font-weight: 500;
+        color: #333;
+        background-color: #fff;
+        padding: 1.2rem 1.5rem;
+    }
 
-        h2 {
-            color: #002b5c;
-            margin-bottom: 10px;
-        }
+    .accordion-button:not(.collapsed) {
+        box-shadow: none; 
+    }
 
-        .lista-preguntas {
-            list-style: none;
-            padding: 0;
-            margin-top: 30px;
-        }
+    /* ESTADOS DE VALIDACIÓN */
+    .accordion-button.pregunta-correcta {
+        background-color: #e8f5e9 !important;
+        color: #1b5e20 !important;
+        border-left: 6px solid #2e7d32;
+    }
+    .accordion-button.pregunta-correcta::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231b5e20'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
 
-        .pregunta-item {
-            background-color: #f0f0f0;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .accordion-button.pregunta-incorrecta {
+        background-color: #ffebee !important;
+        color: #c62828 !important;
+        border-left: 6px solid #ef5350;
+    }
+    .accordion-button.pregunta-incorrecta::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c62828'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
 
-        .pregunta-item:hover {
-            background-color: #eef2f7;
-        }
+    /* Cuerpo de la respuesta */
+    .accordion-body {
+        background-color: #f9f9f9;
+        padding: 1.5rem;
+    }
 
-        .pregunta-item.incorrecta {
-            background-color: #ffe0e0;
-            border-left: 5px solid red;
-        }
+    .justificacion-box {
+        background-color: #fff5f5;
+        border-left: 4px solid #ef5350;
+        padding: 10px 15px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #c62828;
+    }
 
-        .respuesta {
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #ccc;
-        }
+    /* BOTONES */
+    .btn-siguiente {
+        background-color: #003057;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 25px;
+        font-weight: 600;
+        border: 1px solid #003057;
+        transition: all 0.3s;
+    }
+    .btn-siguiente:hover {
+        background-color: #002240;
+        color: white;
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(0, 48, 87, 0.2);
+    }
+    
+    .btn-disabled-lock {
+        background-color: #e0e0e0 !important;
+        border-color: #e0e0e0 !important;
+        color: #999 !important;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
 
-        .justificacion {
-            color: red;
-            font-style: italic;
-        }
+    .btn-volver {
+        border-radius: 8px;
+        padding: 8px 25px;
+        font-weight: 500;
+        border: 1px solid #6c757d; 
+    }
+    .btn-volver:hover { background-color: #e2e6ea; color: #333; }
+</style>
+{% endblock %}
 
-        .boton-avanzar {
-            margin-top: 15px;
-        }
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-10 col-lg-9">
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Motivo</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'etapa_sintomas' paciente.id %}" class="text-decoration-none text-muted">Síntomas</a></li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Interrogatorio</li>
+            </ol>
+        </nav>
 
-        .boton-avanzar button {
-            background-color: #002b5c;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .boton-avanzar button:hover {
-            background-color: #004080;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #eee;
-            margin-top: 40px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <header class="barra-superior">
-        <div class="logo-ucn">
-            <img src="{% static 'img/logo_UCN.png' %}" alt="Logo UCN">
-            <span>Universidad Católica del Norte</span>
-        </div>
-    </header>
-
-    <main class="contenido-principal">
-        <h2>Síntomas - {{ paciente.nombre }}</h2>
-        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
-
-        <ul class="lista-preguntas">
-            {% for pregunta in preguntas %}
-                <li class="pregunta-item" onclick="evaluarPregunta(this, {{ pregunta.es_correcta|yesno:'true,false'|safe }})">
-                    <div class="pregunta-texto">
-                        <strong>{{ pregunta.pregunta }}</strong>
+        <div class="card shadow border-0 rounded-3 bg-white">
+            <div class="card-body p-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded-circle p-2 text-ucn me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-chat-quote-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold text-ucn mb-0">Preguntas sobre Síntomas</h4>
+                            <span class="text-muted small">
+                                Paciente: {{ paciente.nombre }} | {{ paciente.edad }} años
+                            </span>
+                        </div>
                     </div>
-                    <div class="respuesta" style="display:none;">
-                        <p><strong>Respuesta:</strong> {{ pregunta.respuesta }}</p>
-                        {% if not pregunta.es_correcta %}
-                            <p class="justificacion"><strong>Justificación:</strong> {{ pregunta.justificacion_error }}</p>
-                        {% endif %}
-                        {% if pregunta.es_correcta %}
-                            <div class="boton-avanzar">
-                                <button onclick="window.location.href='{% url 'examen_fisico' paciente.id %}'">Avanzar al Examen Físico</button>
+
+                    <div>
+                        <span class="badge bg-light text-dark border p-2 fw-normal" style="font-size: 0.9em;">
+                            <i class="bi bi-crosshair me-1 text-muted"></i>
+                            <span class="text-secondary">Aciertos:</span>
+                            <span id="contadorTexto" class="fw-bold text-dark ms-1">0/0</span>
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="alert alert-light border-start border-4 border-info shadow-sm mb-4">
+                    <i class="bi bi-info-circle-fill text-info me-2"></i>
+                    <strong>Instrucción:</strong> Identifica y realiza las preguntas correctas para profundizar en los síntomas del paciente.
+                </div>
+
+                <div class="accordion" id="accordionSintomas">
+                    
+                    {% for pregunta in preguntas %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ pregunta.id }}">
+                                <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ pregunta.id }}" 
+                                        aria-expanded="false" 
+                                        aria-controls="collapse{{ pregunta.id }}"
+                                        onclick="verificarRespuesta(this, '{{ pregunta.es_correcta|yesno:'true,false' }}')">
+                                    
+                                    <span class="me-2"><i class="bi bi-question-circle"></i></span>
+                                    {{ pregunta.pregunta }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ pregunta.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ pregunta.id }}" data-bs-parent="#accordionSintomas">
+                                <div class="accordion-body">
+                                    
+                                    <div class="mb-2">
+                                        <strong class="text-ucn">{{ paciente.nombre }}:</strong>
+                                        <span class="fst-italic">"{{ pregunta.respuesta }}"</span>
+                                    </div>
+
+                                    {% if not pregunta.es_correcta %}
+                                        <div class="justificacion-box rounded">
+                                            <strong><i class="bi bi-exclamation-circle me-1"></i> Retroalimentación:</strong> 
+                                            {{ pregunta.justificacion_error }}
+                                        </div>
+                                    {% else %}
+                                        <div class="mt-3 text-success small fw-bold">
+                                            <i class="bi bi-check-circle-fill me-1"></i> ¡Correcto! Has desbloqueado el siguiente paso.
+                                        </div>
+                                    {% endif %}
+
+                                </div>
                             </div>
-                        {% endif %}
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    </main>
+                        </div>
+                    {% endfor %}
 
-    <footer>
-        <p>© 2025 Universidad Católica del Norte</p>
-    </footer>
+                </div>
 
-    <script>
-        function evaluarPregunta(elemento, esCorrecta) {
-            const respuesta = elemento.querySelector('.respuesta');
-            const yaVisible = respuesta.style.display === 'block';
+                <div class="d-flex justify-content-between align-items-center pt-4 mt-3 border-top">
+                    
+                    <a href="{% url 'etapa_sintomas' paciente.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Video
+                    </a>
 
-            // Ocultar si ya está visible
-            if (yaVisible) {
-                respuesta.style.display = 'none';
-                elemento.classList.remove('incorrecta');
-                return;
-            }
+                    <a href="{% url 'examen_fisico' paciente.id %}" id="btnSiguiente" class="btn btn-siguiente shadow-sm btn-disabled-lock disabled">
+                        Avanzar al Examen Físico <i class="bi bi-lock-fill ms-2" id="iconCandado"></i>
+                    </a>
 
-            // Mostrar respuesta
-            respuesta.style.display = 'block';
+                </div>
 
-            // Marcar incorrecta si corresponde
-            if (!esCorrecta) {
-                elemento.classList.add('incorrecta');
-            }
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let intentos = 0;
+    let aciertos = 0;
+
+    function verificarRespuesta(boton, esCorrecta) {
+        // 1. Evitar reprocesar si el botón ya fue validado
+        if (boton.classList.contains('pregunta-correcta') || boton.classList.contains('pregunta-incorrecta')) {
+            return; 
         }
-    </script>
-</body>
-</html>
+
+        // 2. Aumentar intentos solo si aun no se ha encontrado la correcta
+        if (aciertos === 0) {
+            intentos++;
+        }
+
+        const icono = boton.querySelector('.bi');
+
+        if (esCorrecta === 'true') {
+            // Estilo Verde
+            boton.classList.add('pregunta-correcta');
+            icono.classList.remove('bi-question-circle');
+            icono.classList.add('bi-check-circle-fill');
+            
+            // Marcar éxito
+            if (aciertos === 0) { aciertos = 1; }
+            
+            // Desbloquear botón siguiente
+            const btn = document.getElementById('btnSiguiente');
+            const iconCandado = document.getElementById('iconCandado');
+            
+            btn.classList.remove('btn-disabled-lock', 'disabled');
+            iconCandado.classList.remove('bi-lock-fill');
+            iconCandado.classList.add('bi-arrow-right');
+            
+        } else {
+            // Estilo Rojo
+            boton.classList.add('pregunta-incorrecta');
+            icono.classList.remove('bi-question-circle');
+            icono.classList.add('bi-x-circle-fill');
+        }
+
+        // 3. ACTUALIZAR EL TEXTO DEL CONTADOR (Formato: 1/3)
+        document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
+    }
+</script>
+{% endblock %}

@@ -1,37 +1,120 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Diagnóstico - {{ paciente.nombre }}</title>
-    <style>
-        body { font-family: 'Segoe UI'; background-color: #f9f9f9; padding: 40px; }
-        .contenedor { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
-        h2 { color: #002b5c; }
-        textarea { width: 100%; padding: 10px; border-radius: 6px; margin-top: 10px; }
-        .botones { margin-top: 20px; display: flex; gap: 10px; }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .volver { background-color: #6c757d; color: white; }
-        .resumen { background-color: #17a2b8; color: white; }
-    </style>
-</head>
-<body>
-    <div class="contenedor">
-        <h2>Diagnóstico - {{ paciente.nombre }}</h2>
-        <p>Edad: {{ paciente.edad }} años | Género: {{ paciente.genero }}</p>
+{% extends 'base.html' %}
+{% load static %}
 
-        <label for="diagnostico">Escribe tu diagnóstico:</label>
-        <textarea id="diagnostico" rows="6" placeholder="Describe aquí tu diagnóstico clínico..."></textarea>
+{% block title %}Diagnóstico - {{ paciente.nombre }}{% endblock %}
 
-        <div class="botones">
-            <button class="volver" onclick="window.history.back()">Volver al examen físico</button>
-            <button class="resumen" onclick="window.location.href='/evaluaciones/evaluar/{{ paciente.id }}/resumen/'">Ir al resumen</button>
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
+
+    /* Estilo del Textarea */
+    .form-control-diagnostico {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 20px;
+        font-size: 1.05rem; /* Letra un poco más grande para leer mejor */
+        line-height: 1.6;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        resize: vertical; /* Permite estirar solo verticalmente */
+        min-height: 300px; /* Altura inicial generosa */
+    }
+
+    .form-control-diagnostico:focus {
+        border-color: #003057;
+        box-shadow: 0 0 0 0.25rem rgba(0, 48, 87, 0.15);
+        outline: 0;
+    }
+
+    /* Botones */
+    .btn-finalizar {
+        background-color: #003057;
+        color: white;
+        border-radius: 8px;
+        padding: 10px 30px;
+        font-weight: 600;
+        border: 1px solid #003057;
+        transition: all 0.3s;
+    }
+    .btn-finalizar:hover {
+        background-color: #002240;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 48, 87, 0.2);
+    }
+
+    .btn-volver {
+        border-radius: 8px;
+        padding: 10px 30px;
+        font-weight: 500;
+        border: 1px solid #6c757d; 
+    }
+    .btn-volver:hover { background-color: #e2e6ea; color: #333; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-10 col-lg-9">
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'examen_fisico' paciente.id %}" class="text-decoration-none text-muted">Examen Físico</a></li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Diagnóstico</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0 rounded-3 bg-white">
+            <div class="card-body p-4 p-md-4"> <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                    <div class="bg-light rounded-circle p-2 text-ucn me-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                        <i class="bi bi-file-medical-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-ucn mb-0">Formulación Diagnóstica</h4>
+                        <span class="text-muted small">
+                            Paciente: {{ paciente.nombre }} | {{ paciente.edad }} años | {{ paciente.genero }}
+                        </span>
+                    </div>
+                </div>
+
+                <form method="POST" action="{% url 'resumen_evaluacion' paciente.id %}" id="formDiagnostico">
+                    {% csrf_token %}
+                    <div class="alert alert-light border-start border-4 border-info shadow-sm mb-4">
+                        <i class="bi bi-info-circle-fill text-info me-2"></i>
+                        Asegúrate de incluir el problema principal, deficiencias y limitaciones.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="diagnostico" class="form-label fw-bold text-secondary mb-2">
+                            <i class="bi bi-pen me-2"></i>Escribe tu hipótesis diagnóstica:
+                        </label>
+                        <textarea 
+                            name="diagnostico" 
+                            id="diagnostico" 
+                            class="form-control form-control-diagnostico" 
+                            placeholder="Basado en la anamnesis y el examen físico, describe aquí tu diagnóstico kinésico detallado..."
+                            required></textarea>
+                    </div>
+
+                </form>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-4">
+                    
+                    <a href="{% url 'examen_fisico' paciente.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
+                        <i class="bi bi-arrow-left me-2"></i>Volver al Examen
+                    </a>
+
+                    <button type="submit" form="formDiagnostico" class="btn btn-finalizar shadow-sm">
+                        Finalizar y Ver Resumen <i class="bi bi-file-earmark-check ms-2"></i>
+                    </button>
+
+                </div>
+
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

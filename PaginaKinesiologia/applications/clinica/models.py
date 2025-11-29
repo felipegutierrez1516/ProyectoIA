@@ -47,17 +47,19 @@ class Tema_Interrogacion(models.Model):
 
 
 
+# applications/clinica/models.py
+
 PARTES_CHOICES = [
     ('cabeza', 'Cabeza'),
     ('cuello', 'Cuello'),
-    ('mano_izquierda', 'Mano Izquierda'),
-    ('mano_derecha', 'Mano Derecha'),
-    ('codo_izquierdo', 'Codo Izquierdo'),
-    ('codo_derecho', 'Codo Derecho'),
     ('hombro_izquierdo', 'Hombro Izquierdo'),
     ('hombro_derecho', 'Hombro Derecho'),
-    ('espalda', 'Espalda'),
+    ('codo_izquierdo', 'Codo Izquierdo'),
+    ('codo_derecho', 'Codo Derecho'),
+    ('mano_izquierda', 'Mano Izquierda'),
+    ('mano_derecha', 'Mano Derecha'),
     ('pecho', 'Pecho'),
+    ('espalda', 'Espalda'),
     ('abdomen', 'Abdomen'),
     ('pelvis', 'Pelvis'),
     ('muslo_izquierdo', 'Muslo Izquierdo'),
@@ -68,33 +70,35 @@ PARTES_CHOICES = [
     ('pie_derecho', 'Pie Derecho'),
 ]
 
+# Mapa de Coordenadas en Porcentajes (Left %, Top %)
+# Estos valores ubican los puntos correctamente sin importar el tamaño de la imagen.
 COORDS_MAP = {
-    'cabeza': (270, 40),
-    'cuello': (270, 90),
-    'hombro_izquierdo': (220, 120),
-    'hombro_derecho': (320, 120),
-    'codo_izquierdo': (200, 180),
-    'codo_derecho': (340, 180),
-    'mano_izquierda': (180, 240),
-    'mano_derecha': (360, 240),
-    'espalda': (270, 160),
-    'pecho': (270, 140),
-    'abdomen': (270, 200),
-    'pelvis': (270, 250),
-    'muslo_izquierdo': (240, 300),
-    'muslo_derecho': (300, 300),
-    'rodilla_izquierda': (240, 370),
-    'rodilla_derecha': (300, 370),
-    'pie_izquierdo': (240, 460),
-    'pie_derecho': (300, 460),
+    'cabeza': (50, 6),
+    'cuello': (50, 13),
+    'hombro_izquierdo': (32, 18),
+    'hombro_derecho': (68, 18),
+    'pecho': (50, 23),
+    'espalda': (50, 23),  # Ubicación aproximada en tórax
+    'codo_izquierdo': (27, 29),
+    'codo_derecho': (73, 29),
+    'abdomen': (50, 34),
+    'mano_izquierda': (21, 42),
+    'mano_derecha': (79, 42),
+    'pelvis': (50, 44),
+    'muslo_izquierdo': (42, 53),
+    'muslo_derecho': (58, 53),
+    'rodilla_izquierda': (42, 69),
+    'rodilla_derecha': (58, 69),
+    'pie_izquierdo': (42, 90),
+    'pie_derecho': (58, 90),
 }
 
 class Partes_del_Cuerpo(models.Model):
     etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=150, choices=PARTES_CHOICES)
     descripcion = models.TextField()
-    left = models.IntegerField(default=0)
-    top = models.IntegerField(default=0)
+    left = models.IntegerField(default=0, help_text="Posición Horizontal en % (0-100)")
+    top = models.IntegerField(default=0, help_text="Posición Vertical en % (0-100)")
     correcta = models.BooleanField(default=False)
 
     def __str__(self):

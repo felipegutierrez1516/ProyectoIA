@@ -1,55 +1,118 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Registro - Universidad Católica del Norte</title>
-    <link rel="stylesheet" href="{% static 'css/estilos_registro.css' %}">
-</head>
-<body>
-    <div class="contenedor-registro">
-        <div class="formulario">
-            <h1>Universidad Católica del Norte</h1>
-            <h2>Crear cuenta</h2>
+{% block title %}Registro - Kinesiología UCN{% endblock %}
 
-            <form method="POST">
-                {% csrf_token %}
-                <label>Nombre</label>
-                <input type="text" name="first_name" required>
+{% block extra_css %}
+<style>
+    /* Estilos personalizados */
+    .form-control-registro {
+        background-color: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s;
+    }
 
-                <label>Apellido</label>
-                <input type="text" name="last_name" required>
+    .form-control-registro:focus {
+        background-color: #fff;
+        border-color: #003057; /* Azul UCN */
+        box-shadow: 0 0 0 0.25rem rgba(0, 48, 87, 0.15);
+        outline: none;
+    }
 
-                <label>Correo electrónico</label>
-                <input type="email" name="email" required>
+    .form-label {
+        font-weight: 600;
+        color: #003057;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
 
-                <label>Nombre de usuario</label>
-                <input type="text" name="username" placeholder="ej: felipe.gutierrez03" required>
+    .btn-ucn {
+        background-color: #003057;
+        color: white;
+        border: none;
+        padding: 12px;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        transition: background-color 0.3s;
+    }
+    .btn-ucn:hover {
+        background-color: #002240;
+        color: white;
+    }
+    
+    .card-registro {
+        border-radius: 1rem;
+        border: none;
+    }
+</style>
+{% endblock %}
 
-                <label>Contraseña</label>
-                <input type="password" name="password" required>
-
-                <button type="submit">Registrarse</button>
+{% block content %}
+<div class="row justify-content-center mb-3">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="card card-registro shadow-lg">
+            <div class="card-body p-5">
+                
+                <div class="text-center mb-3">
+                    <h2 class="fw-bold" style="color: #003057;">Crear Cuenta</h2>
+                    <p class="text-muted small">Únete a la plataforma de Kinesiología UCN</p>
+                </div>
 
                 {% if error %}
-                    <p class="error">{{ error }}</p>
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle-fill me-2" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                        </svg>
+                        <div>{{ error }}</div>
+                    </div>
                 {% endif %}
-            </form>
 
-            <div class="acciones-extra">
-                <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="first_name" class="form-control form-control-registro" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellido</label>
+                            <input type="text" name="last_name" class="form-control form-control-registro" placeholder="Tu apellido" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Correo Institucional</label>
+                            <input type="email" name="email" class="form-control form-control-registro" placeholder="nombre@alumnos.ucn.cl" required>
+                            <div class="form-text small text-muted">Usa tu correo @ucn.cl o @alumnos.ucn.cl</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" name="password" class="form-control form-control-registro" placeholder="Crea una contraseña segura" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-ucn">Registrarse</button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4 pt-2 border-top">
+                    <p class="mb-1 text-muted small">¿Ya tienes una cuenta?</p>
+                    <a href="{% url 'login' %}" class="fw-bold text-decoration-none" style="color: #003057;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                        </svg>
+                        Volver al Inicio de Sesión
+                    </a>
+                </div>
+
             </div>
         </div>
 
-        <div class="banner">
-            <!-- Imagen institucional o fondo azul -->
-        </div>
     </div>
-
-    <footer>
-        <p>Copyright © 2025 UCN Todos los derechos reservados</p>
-        <a href="#">English</a>
-    </footer>
-</body>
-</html>
+</div>
+{% endblock %}
