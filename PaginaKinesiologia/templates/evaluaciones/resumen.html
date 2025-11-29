@@ -1,31 +1,165 @@
 {% extends 'base.html' %}
-{% block title %}Resumen de Evaluación{% endblock %}
+{% load static %}
+
+{% block title %}Resumen - {{ paciente.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
+
+    /* Tarjetas de Puntaje Compactas */
+    .score-card {
+        border: 1px solid #eef2f7;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        transition: transform 0.2s;
+        padding: 1.2rem !important; /* Padding reducido */
+    }
+    .score-card:hover { transform: translateY(-2px); }
+    
+    .score-icon {
+        width: 40px; /* Más pequeño */
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-motivo .score-icon { background-color: #e3f2fd; color: #1976d2; }
+    .card-sintomas .score-icon { background-color: #e8f5e9; color: #388e3c; }
+    .card-examen .score-icon { background-color: #fff3e0; color: #f57c00; }
+
+    /* Diagnóstico */
+    .diagnostico-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #003057;
+        padding: 15px;
+        border-radius: 0 6px 6px 0;
+        font-size: 0.95rem;
+    }
+
+    /* Botón Final Compacto */
+    .btn-enviar {
+        background-color: #28a745;
+        color: white;
+        border-radius: 50px;
+        padding: 8px 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-enviar:hover {
+        background-color: #218838;
+        transform: scale(1.02);
+        color: white;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card shadow-sm">
-  <div class="card-body">
-    <h4 class="card-title">Resumen de Evaluación - {{ paciente.nombre }}</h4>
-    <p class="text-muted">Edad: {{ paciente.edad }} | Género: {{ paciente.genero }}</p>
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-9"> <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-3 small">
+                <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Resultados</li>
+            </ol>
+        </nav>
 
-    <div class="row text-center mb-3">
-      <div class="col-md-4"><div class="alert alert-secondary">Motivo: <strong>{{ motivo }}</strong></div></div>
-      <div class="col-md-4"><div class="alert alert-secondary">Síntomas: <strong>{{ sintomas }}</strong></div></div>
-      <div class="col-md-4"><div class="alert alert-secondary">Examen físico: <strong>{{ examen }}</strong></div></div>
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-ucn mb-1">Resultados de Evaluación</h3>
+            <p class="text-muted small">Paciente: {{ paciente.nombre }}</p>
+        </div>
+
+        <div class="row g-3 mb-4">
+            
+            <div class="col-md-4">
+                <div class="card score-card card-motivo text-center h-100">
+                    <div class="d-flex justify-content-center">
+                        <div class="score-icon"><i class="bi bi-chat-quote-fill"></i></div>
+                    </div>
+                    <h6 class="fw-bold mb-1">Motivo</h6>
+                    <div class="h4 fw-bold my-1 text-dark">{{ score_motivo.correctas }}/{{ score_motivo.total }}</div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Aciertos</small>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card score-card card-sintomas text-center h-100">
+                    <div class="d-flex justify-content-center">
+                        <div class="score-icon"><i class="bi bi-activity"></i></div>
+                    </div>
+                    <h6 class="fw-bold mb-1">Síntomas</h6>
+                    <div class="h4 fw-bold my-1 text-dark">{{ score_sintomas.correctas }}/{{ score_sintomas.total }}</div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Aciertos</small>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card score-card card-examen text-center h-100">
+                    <div class="d-flex justify-content-center">
+                        <div class="score-icon"><i class="bi bi-person-bounding-box"></i></div>
+                    </div>
+                    <h6 class="fw-bold mb-1">Examen Físico</h6>
+                    <div class="h4 fw-bold my-1 text-dark">{{ score_examen.correctas }}/{{ score_examen.total }}</div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Hallazgos</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-body p-4">
+                
+                <div class="row align-items-center mb-3">
+                    <div class="col-6 border-end text-center">
+                        <h6 class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Tiempo Total</h6>
+                        <div class="d-flex align-items-center justify-content-center text-ucn">
+                            <i class="bi bi-clock fs-5 me-2"></i>
+                            <span class="h4 fw-bold mb-0">{{ tiempo_total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <h6 class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Puntaje Global</h6>
+                        <div class="d-flex align-items-center justify-content-center text-primary">
+                            <i class="bi bi-trophy fs-5 me-2"></i>
+                            <span class="h4 fw-bold mb-0">{{ total_correctas }} / {{ total_preguntas }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="opacity-10 my-3">
+
+                <h6 class="fw-bold text-ucn mb-2 small">
+                    <i class="bi bi-file-medical me-2"></i>Tu Diagnóstico
+                </h6>
+                <div class="diagnostico-box shadow-sm mb-4">
+                    <p class="mb-0 text-dark fst-italic small" style="white-space: pre-wrap;">{{ evaluacion.diagnostico }}</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="enviar_correo" value="true">
+                        
+                        <button type="submit" class="btn btn-enviar shadow-sm">
+                            Finalizar y Enviar <i class="bi bi-send-check ms-2"></i>
+                        </button>
+                    </form>
+                    
+                    <div class="mt-2">
+                        <a href="{% url 'vista_diagnostico' paciente.id %}" class="text-decoration-none text-muted" style="font-size: 0.8rem;">
+                            <i class="bi bi-pencil me-1"></i>Editar Diagnóstico
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
-
-    <p><span class="badge bg-primary">Total: {{ correctas }}/{{ total }}</span>
-       <span class="badge bg-info text-dark">Tiempo: {{ tiempo_total }}</span></p>
-
-    <form method="post" class="d-inline">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-success" {% if total == 0 %}disabled{% endif %}>
-        Enviar respuestas al docente
-      </button>
-    </form>
-    <a href="{% url 'vista_diagnostico' paciente.id %}" class="btn btn-outline-primary">Volver al diagnóstico</a>
-
-    {% if total == 0 %}
-      <div class="alert alert-warning mt-3">No puedes enviar aún: no hay respuestas registradas.</div>
-    {% endif %}
-  </div>
 </div>
 {% endblock %}

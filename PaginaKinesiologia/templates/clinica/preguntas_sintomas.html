@@ -150,12 +150,13 @@
                     {% for pregunta in preguntas %}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{ pregunta.id }}">
-                                <button class="accordion-button collapsed" type="button" 
+                                <button class="accordion-button collapsed" type="button"
+                                        data-id="{{ pregunta.id }}" 
                                         data-bs-toggle="collapse" 
                                         data-bs-target="#collapse{{ pregunta.id }}" 
                                         aria-expanded="false" 
                                         aria-controls="collapse{{ pregunta.id }}"
-                                        onclick="verificarRespuesta(this, '{{ pregunta.es_correcta|yesno:'true,false' }}')">
+                                        onclick="verificarRespuesta(this, '{{ pregunta.es_correcta|yesno:'true,false' }}', '{{ pregunta.id }}')">
                                     
                                     <span class="me-2"><i class="bi bi-question-circle"></i></span>
                                     {{ pregunta.pregunta }}
@@ -206,49 +207,63 @@
 {% endblock %}
 
 {% block extra_js %}
+// BLOQUE JS MEJORADO
 <script>
     let intentos = 0;
-    let aciertos = 0;
+    let aciertos = 0; // 0 o 1
+    const pacienteId = "{{ paciente.id }}";
 
-    function verificarRespuesta(boton, esCorrecta) {
-        // 1. Evitar reprocesar si el botón ya fue validado
+    function verificarRespuesta(boton, esCorrectaStr, preguntaId) {
+        // Evitar clic repetido visual en el mismo botón
         if (boton.classList.contains('pregunta-correcta') || boton.classList.contains('pregunta-incorrecta')) {
             return; 
         }
 
-        // 2. Aumentar intentos solo si aun no se ha encontrado la correcta
+        const esCorrecta = (esCorrectaStr === 'true');
+
+        // LÓGICA DEL CONTADOR (Problema 1 Solucionado)
+        // Solo sumamos intentos si AÚN NO HEMOS ACERTADO.
+        // Si ya acertaste (aciertos=1), puedes seguir explorando las incorrectas sin que sume al contador.
         if (aciertos === 0) {
             intentos++;
+            if (esCorrecta) {
+                aciertos = 1;
+            }
+            document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
         }
 
+        // CAMBIOS VISUALES
         const icono = boton.querySelector('.bi');
-
-        if (esCorrecta === 'true') {
-            // Estilo Verde
+        if (esCorrecta) {
             boton.classList.add('pregunta-correcta');
             icono.classList.remove('bi-question-circle');
             icono.classList.add('bi-check-circle-fill');
             
-            // Marcar éxito
-            if (aciertos === 0) { aciertos = 1; }
-            
-            // Desbloquear botón siguiente
+            // Desbloquear botón
             const btn = document.getElementById('btnSiguiente');
             const iconCandado = document.getElementById('iconCandado');
-            
             btn.classList.remove('btn-disabled-lock', 'disabled');
             iconCandado.classList.remove('bi-lock-fill');
             iconCandado.classList.add('bi-arrow-right');
-            
         } else {
-            // Estilo Rojo
             boton.classList.add('pregunta-incorrecta');
             icono.classList.remove('bi-question-circle');
             icono.classList.add('bi-x-circle-fill');
         }
 
-        // 3. ACTUALIZAR EL TEXTO DEL CONTADOR (Formato: 1/3)
-        document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
+        // GUARDAR EN BASE DE DATOS (Problema 3 Solucionado)
+        fetch("{% url 'guardar_respuesta_ajax' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                paciente_id: pacienteId,
+                pregunta_id: preguntaId,
+                es_correcta: esCorrecta
+            })
+        });
     }
 </script>
 {% endblock %}

@@ -21,6 +21,7 @@ urlpatterns = [
 
     # Examen físico
     path('examen_fisico/<int:paciente_id>/', views.examen_fisico, name='examen_fisico'),
-    path('registrar_parte/<int:paciente_id>/', views.registrar_parte_examen_fisico, name='registrar_parte_examen_fisico'),
+
+    path('api/guardar_respuesta/', views.registrar_respuesta_ajax, name='guardar_respuesta_ajax'),
 ]
 
