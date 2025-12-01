@@ -9,34 +9,31 @@
     .bg-ucn { background-color: #003057 !important; color: white; }
     .text-ucn { color: #003057 !important; }
 
-    /* Contenedor de la Imagen de Sala */
+    /* Contenedor */
     .sala-container {
         position: relative;
         width: 100%;
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        background-color: #f0f0f0; /* Fondo por si la imagen tarda en cargar */
+        background-color: #f0f0f0;
     }
 
     .sala-imagen {
         width: 100%;
         height: auto;
         display: block;
-        min-height: 400px; /* Altura mínima para asegurar espacio */
+        min-height: 400px;
         object-fit: cover;
     }
 
-    /* Marcadores de Pacientes (Avatares) */
+    /* --- MARCADORES --- */
     .paciente-marker {
         position: absolute;
-        /* Ajustamos el TOP para que parezca que están en las sillas. 
-           Ajusta este % según tu imagen real de fondo */
         top: 55%; 
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #003057;
         color: white;
         display: flex;
         align-items: center;
@@ -49,19 +46,30 @@
         text-decoration: none;
     }
 
-    /* Efecto Hover y Pulso */
-    .paciente-marker:hover {
+    /* Estado NORMAL (Azul) */
+    .marker-pendiente {
+        background-color: #003057;
+    }
+    .marker-pendiente:hover {
         transform: scale(1.15) translateY(-5px);
         background-color: #004a87;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    }
+
+    /* Estado COMPLETADO (Verde) */
+    .marker-completado {
+        background-color: #28a745 !important; /* Verde éxito */
+        border-color: #fff;
+    }
+    .marker-completado:hover {
+        transform: scale(1.15) translateY(-5px);
+        background-color: #218838 !important;
     }
     
-    /* Animación de pulso para indicar que se puede hacer clic */
-    .paciente-marker::after {
+    /* Animación solo para pendientes */
+    .marker-pendiente::after {
         content: '';
         position: absolute;
-        width: 100%;
-        height: 100%;
+        width: 100%; height: 100%;
         border-radius: 50%;
         border: 2px solid #003057;
         animation: pulse 2s infinite;
@@ -73,7 +81,6 @@
         100% { transform: scale(1.6); opacity: 0; }
     }
 
-    /* Sidebar lista de casos */
     .list-group-item-active-custom {
         background-color: #e3f2fd;
         color: #003057;
@@ -129,8 +136,8 @@
 
         <div class="alert alert-light border-start border-4 border-info shadow-sm mb-3">
             <i class="bi bi-info-circle-fill text-info me-2"></i>
-            <span class="fw-semibold text-dark">Selecciona un paciente.</span> 
-            Haz clic sobre uno de los iconos en la imagen para ver sus datos y comenzar la evaluación.
+            <span class="fw-semibold text-dark">Instrucción:</span> 
+            Haz clic sobre uno de los iconos en la imagen para ver sus datos y comenzar la evaluación. Los pacientes en <span class="badge bg-primary">Azul</span> están pendientes, mientras que en <span class="badge bg-success">Verde</span> ya fueron evaluados.
         </div>
 
         <div class="card shadow border-0 p-2 rounded-3">
@@ -139,30 +146,22 @@
                 
                 {% for paciente in pacientes %}
                     
-                    {% if forloop.counter == 1 %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 15%;" 
-                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
+                    {% if paciente.id in pacientes_evaluados %}
+                        <a href="{% url 'motivo_consulta' paciente.id %}" 
+                           class="paciente-marker marker-completado"
+                           style="left: {% if forloop.counter == 1 %}15%{% elif forloop.counter == 2 %}32%{% elif forloop.counter == 3 %}49%{% elif forloop.counter == 4 %}66%{% else %}83%{% endif %};" 
+                           data-bs-toggle="tooltip" data-bs-html="true" 
+                           title="<strong>{{ paciente.nombre }}</strong><br>Evaluación Completada"
+                           onclick="return confirm('Ya has realizado esta evaluación clínica. ¿Estás seguro de que quieres realizarla nuevamente?');">
+                            <i class="bi bi-check-lg fs-4"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'motivo_consulta' paciente.id %}" 
+                           class="paciente-marker marker-pendiente"
+                           style="left: {% if forloop.counter == 1 %}15%{% elif forloop.counter == 2 %}32%{% elif forloop.counter == 3 %}49%{% elif forloop.counter == 4 %}66%{% else %}83%{% endif %};" 
+                           data-bs-toggle="tooltip" data-bs-html="true" 
+                           title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
                             <i class="bi bi-person-fill fs-4"></i>
-                        </a>
-                    {% elif forloop.counter == 2 %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 32%;"
-                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
-                            <i class="bi bi-person-fill fs-4"></i>
-                        </a>
-                    {% elif forloop.counter == 3 %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 49%;"
-                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
-                             <i class="bi bi-person-fill fs-4"></i>
-                        </a>
-                    {% elif forloop.counter == 4 %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 66%;"
-                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
-                             <i class="bi bi-person-fill fs-4"></i>
-                        </a>
-                    {% elif forloop.counter == 5 %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" class="paciente-marker" style="left: 83%;"
-                           data-bs-toggle="tooltip" data-bs-html="true" title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
-                             <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     {% endif %}
 
@@ -182,7 +181,7 @@
 
 {% block extra_js %}
 <script>
-    // Inicializar Tooltips de Bootstrap
+    // Inicializar Tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

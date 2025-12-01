@@ -1,5 +1,4 @@
 from django.db import models
-from applications.usuarios.models import Docente
 
 # Create your models here.
 
@@ -19,7 +18,7 @@ class Curso(models.Model):
     estado = models.CharField(max_length=10, choices=[('activo','Activo'),('inactivo','Inactivo')])
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
-    docente = models.ForeignKey(Docente, on_delete=models.CASCADE)
+    docente = models.ForeignKey('usuarios.Docente', on_delete=models.CASCADE)
     objetivo = models.ForeignKey(Aprendizaje_Esperado, on_delete=models.CASCADE)
 
     def __str__(self):

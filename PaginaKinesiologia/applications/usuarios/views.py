@@ -85,15 +85,105 @@ from applications.cursos.models import Curso
 from applications.inscripciones.models import Solicitud_Inscripcion
 from applications.clinica.models import Caso  # Asegúrate de tener esta importación
 
+# applications/usuarios/views.py
+
 def inicio_estudiante(request):
     estudiante = Estudiante.objects.get(perfil__user=request.user)
+    
+    # Obtener todos los cursos inscritos
     solicitudes = Solicitud_Inscripcion.objects.filter(estudiante=estudiante, estado='aceptada')
     cursos_inscritos = [s.curso for s in solicitudes]
 
-    casos = Caso.objects.filter(curso__in=cursos_inscritos, estado='Activo') if cursos_inscritos else []
+    # LÓGICA DE CURSO ACTIVO
+    curso_seleccionado = None
+    
+    if cursos_inscritos:
+        # 1. Si el estudiante eligió uno en ajustes, usamos ese
+        if estudiante.curso_activo and estudiante.curso_activo in cursos_inscritos:
+            curso_seleccionado = estudiante.curso_activo
+        else:
+            # 2. Si no ha elegido (o el elegido ya no es válido), usamos el primero por defecto
+            curso_seleccionado = cursos_inscritos[0]
+            # (Opcional) Guardamos este como default para la próxima
+            estudiante.curso_activo = curso_seleccionado
+            estudiante.save()
+
+    # Obtener casos del curso seleccionado
+    casos = []
+    if curso_seleccionado:
+        casos = Caso.objects.filter(curso=curso_seleccionado, estado='Activo')
 
     return render(request, 'usuarios/inicio.html', {
         'estudiante': estudiante,
         'cursos_inscritos': cursos_inscritos,
+        'curso_activo': curso_seleccionado, # Enviamos el curso activo al template
         'casos': casos
+    })
+
+
+
+
+
+# applications/usuarios/views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from .models import Estudiante, Perfil
+from applications.inscripciones.models import Solicitud_Inscripcion
+
+# applications/usuarios/views.py
+
+def ver_perfil(request):
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
+    
+    # Obtener cursos donde el estudiante fue aceptado
+    solicitudes = Solicitud_Inscripcion.objects.filter(estudiante=estudiante, estado='aceptada')
+    cursos_inscritos = [s.curso for s in solicitudes]
+
+    password_form = PasswordChangeForm(request.user)
+
+    if request.method == 'POST':
+        # CASO A: Cambiar Contraseña
+        if 'change_password' in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Mantiene la sesión activa
+                messages.success(request, 'Tu contraseña ha sido actualizada.')
+                return redirect('ver_perfil')
+            else:
+                messages.error(request, 'Error en la contraseña. Verifica los campos.')
+
+        # CASO B: Guardar Ajustes (Puede venir de "Mis Cursos" o de "Ajustes")
+        elif 'save_settings' in request.POST:
+            
+            # 1. ¿Viene de la pestaña "Ajustes" (Preferencias)?
+            # Buscamos el campo oculto 'ajustes_generales' que pusimos en el HTML
+            if 'ajustes_generales' in request.POST:
+                estudiante.modo_oscuro = (request.POST.get('modo_oscuro') == 'on')
+                estudiante.ocultar_instrucciones = (request.POST.get('ocultar_instrucciones') == 'on')
+                messages.success(request, 'Preferencias de visualización actualizadas.')
+
+            # 2. ¿Viene de la pestaña "Mis Cursos" (Selector de curso)?
+            # Verificamos si el select 'curso_activo' está presente en los datos enviados
+            if 'curso_activo' in request.POST:
+                curso_id_seleccionado = request.POST.get('curso_activo')
+                if curso_id_seleccionado:
+                    # Validación de seguridad: el curso debe pertenecer a los inscritos
+                    ids_validos = [c.id for c in cursos_inscritos]
+                    if int(curso_id_seleccionado) in ids_validos:
+                        estudiante.curso_activo_id = curso_id_seleccionado
+                        messages.success(request, 'Curso principal actualizado.')
+                    else:
+                        messages.error(request, 'El curso seleccionado no es válido.')
+
+            estudiante.save()
+            return redirect('ver_perfil')
+
+    return render(request, 'usuarios/perfil.html', {
+        'estudiante': estudiante,
+        'cursos_inscritos': cursos_inscritos,
+        'password_form': password_form
     })

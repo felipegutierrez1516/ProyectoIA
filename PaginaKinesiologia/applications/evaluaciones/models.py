@@ -14,9 +14,17 @@ class Evaluacion(models.Model):
     diagnostico = models.TextField()
     tiempo_total = models.DurationField()
     respuestas_correctas_primer_intento = models.IntegerField(default=0)
+    estado = models.CharField(
+        max_length=20, 
+        choices=[('en_curso', 'En Curso'), ('finalizada', 'Finalizada')],
+        default='en_curso'
+    )
 
+    puntaje_diagnostico = models.FloatField(null=True, blank=True, help_text="Puntaje otorgado por el docente (ej: 1 a 7)")
+    comentario_docente = models.TextField(null=True, blank=True, help_text="Retroalimentación general del docente")
+    
     def __str__(self):
-        return f"{self.id} - {self.nombre}"
+        return f"{self.id} - {self.nombre} ({self.estado})"
 
 
 class Respuesta_Evaluacion(models.Model):

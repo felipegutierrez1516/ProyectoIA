@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Progreso - UCN{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
+
+    /* Tarjeta de Evaluación */
+    .card-historial {
+        border: 1px solid #eef2f7;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        transition: transform 0.2s;
+        background: white;
+        overflow: hidden;
+    }
+    .card-historial:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+
+    /* Encabezado de Tarjeta */
+    .card-header-historial {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eef2f7;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Badges de Puntaje */
+    .badge-score {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        min-width: 60px;
+        text-align: center;
+        display: inline-block;
+    }
+    .bg-score-motivo { background-color: #e3f2fd; color: #0d47a1; }
+    .bg-score-sintomas { background-color: #e8f5e9; color: #1b5e20; }
+    .bg-score-examen { background-color: #fff3e0; color: #e65100; }
+
+    /* Caja Comentario Docente */
+    .docente-feedback {
+        background-color: #fff8e1; /* Amarillo suave */
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.9rem;
+    }
+    
+    .feedback-pendiente {
+        background-color: #f1f3f5;
+        border-left: 4px solid #adb5bd;
+        color: #6c757d;
+        font-style: italic;
+        padding: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-10">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-ucn m-0">Mi Progreso</h2>
+                <p class="text-muted small mb-0">Historial de casos clínicos realizados</p>
+            </div>
+            <a href="{% url 'inicio_estudiante' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-house-door me-2"></i>Volver al Inicio
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0 p-3 mb-4 bg-white rounded-3">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Filtrar por Curso</label>
+                    <select name="curso" class="form-select form-select-sm">
+                        <option value="">Todos los cursos</option>
+                        {% for c in cursos_filtro %}
+                            <option value="{{ c.id }}" {% if request.GET.curso == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Tipo de Caso</label>
+                    <select name="tipo_caso" class="form-select form-select-sm">
+                        <option value="">Todos los tipos</option>
+                        {% for t in tipos_caso_filtro %}
+                            <option value="{{ t }}" {% if request.GET.tipo_caso == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-sm btn-primary w-100 bg-ucn border-0">Filtrar</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'ver_progreso' %}" class="btn btn-sm btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </form>
+        </div>
+
+        {% if reporte %}
+            {% for item in reporte %}
+            <div class="card card-historial mb-4">
+                
+                <div class="card-header-historial">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-ucn text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-check-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">{{ item.paciente.nombre }}</h6>
+                            <small class="text-muted">{{ item.curso }} - {{ item.caso }}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge bg-light text-dark border">
+                            <i class="bi bi-calendar3 me-1"></i> {{ item.evaluacion.fecha_evaluacion|date:"d/m/Y" }}
+                        </div>
+                        <div class="mt-1 small text-muted">
+                            <i class="bi bi-clock me-1"></i> {{ item.evaluacion.tiempo_total }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        
+                        <div class="col-md-5 border-end">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Desempeño por Etapa</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small"><i class="bi bi-chat-quote me-2"></i>Motivo</span>
+                                <span class="badge-score bg-score-motivo">{{ item.score_motivo }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small"><i class="bi bi-activity me-2"></i>Síntomas</span>
+                                <span class="badge-score bg-score-sintomas">{{ item.score_sintomas }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small"><i class="bi bi-person-bounding-box me-2"></i>Examen Físico</span>
+                                <span class="badge-score bg-score-examen">{{ item.score_examen }}</span>
+                            </div>
+                            
+                            <div class="border-top pt-2 d-flex justify-content-between align-items-center">
+                                <strong class="text-ucn">Total Automático</strong>
+                                <strong class="fs-5">{{ item.total_correctas }} / {{ item.total_preguntas }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7 ps-md-4">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Revisión Docente (Diagnóstico)</h6>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="d-block text-muted">Calificación</small>
+                                    {% if item.nota_docente != "Pendiente" %}
+                                        <span class="fs-4 fw-bold text-success">{{ item.nota_docente }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pendiente</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if item.nota_docente != "Pendiente" %}
+                                <div class="docente-feedback rounded">
+                                    <strong class="d-block mb-1 text-warning-emphasis"><i class="bi bi-chat-dots-fill me-2"></i>Comentario del Docente:</strong>
+                                    "{{ item.comentario }}"
+                                </div>
+                            {% else %}
+                                <div class="feedback-pendiente rounded">
+                                    <i class="bi bi-hourglass-split me-2"></i>
+                                    El docente aún no ha revisado tu diagnóstico.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-clipboard-data"></i></div>
+                <h4 class="text-muted">Aún no tienes evaluaciones registradas.</h4>
+                <p class="text-muted">Completa un caso clínico para ver tu progreso aquí.</p>
+                <a href="{% url 'inicio_estudiante' %}" class="btn btn-primary bg-ucn border-0 mt-3">Ir a Inicio</a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

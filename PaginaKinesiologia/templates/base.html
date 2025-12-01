@@ -41,8 +41,8 @@
                 
                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUser1">
                     <li><h6 class="dropdown-header">Mi Cuenta</h6></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Ver perfil</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-bar-chart me-2"></i>Ver progreso</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ver_perfil' %}"><i class="bi bi-person me-2"></i>Ver perfil</a></li>
+                    <li><a class="dropdown-item" href="{% url 'ver_progreso' %}"><i class="bi bi-bar-chart me-2"></i>Ver progreso</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{% url 'logout' %}" method="post" class="m-0">

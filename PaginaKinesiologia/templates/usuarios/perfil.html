@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - UCN{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos UCN */
+    .bg-ucn { background-color: #003057 !important; color: white; }
+    .text-ucn { color: #003057 !important; }
+
+    /* Estilo de la barra lateral de navegación */
+    .list-group-item.active {
+        background-color: #003057;
+        border-color: #003057;
+        font-weight: 600;
+    }
+    
+    .list-group-item {
+        border-left: 4px solid transparent;
+        transition: all 0.2s;
+    }
+    
+    .list-group-item:hover:not(.active) {
+        background-color: #f8f9fa;
+        border-left-color: #003057;
+    }
+
+    /* Estilo de las tarjetas de contenido */
+    .card-perfil {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+
+    /* Avatar grande */
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background-color: #e3f2fd;
+        color: #003057;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        margin: 0 auto 1rem auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-11">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-ucn m-0">Mi Perfil</h2>
+            <a href="{% url 'inicio_estudiante' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-house-door me-2"></i>Volver al Inicio
+            </a>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-md-3">
+                <div class="card card-perfil mb-3">
+                    <div class="card-body text-center p-4">
+                        <div class="profile-avatar mb-3">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
+                        <small class="text-muted">Estudiante</small>
+                    </div>
+                </div>
+
+                <div class="list-group shadow-sm rounded-3" id="list-tab" role="tablist">
+                    <a class="list-group-item list-group-item-action active py-3" id="list-datos-list" data-bs-toggle="list" href="#list-datos" role="tab">
+                        <i class="bi bi-person-lines-fill me-2"></i> Datos Personales
+                    </a>
+                    <a class="list-group-item list-group-item-action py-3" id="list-cursos-list" data-bs-toggle="list" href="#list-cursos" role="tab">
+                        <i class="bi bi-journal-medical me-2"></i> Mis Cursos
+                    </a>
+                    <a class="list-group-item list-group-item-action py-3" id="list-ajustes-list" data-bs-toggle="list" href="#list-ajustes" role="tab">
+                        <i class="bi bi-gear-fill me-2"></i> Ajustes
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="tab-content" id="nav-tabContent">
+                    
+                    <div class="tab-pane fade show active" id="list-datos" role="tabpanel">
+                        <div class="card card-perfil p-4">
+                            <h5 class="fw-bold text-ucn mb-4 border-bottom pb-2">Información Personal</h5>
+                            
+                            <div class="row g-3 mb-5">
+                                <div class="col-md-6">
+                                    <label class="small text-muted fw-bold text-uppercase">Nombre</label>
+                                    <p class="form-control-plaintext fw-bold">{{ user.first_name }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small text-muted fw-bold text-uppercase">Apellido</label>
+                                    <p class="form-control-plaintext fw-bold">{{ user.last_name }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small text-muted fw-bold text-uppercase">Correo Institucional</label>
+                                    <p class="form-control-plaintext">{{ user.email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small text-muted fw-bold text-uppercase">Fecha de Registro</label>
+                                    <p class="form-control-plaintext">{{ user.date_joined|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+
+                            <h5 class="fw-bold text-ucn mb-3 border-bottom pb-2">Seguridad</h5>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="change_password" value="true">
+                                
+                                {% for field in password_form %}
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <div class="form-text small">{{ field.help_text }}</div>
+                                        {% endif %}
+                                        {% if field.errors %}
+                                            <div class="text-danger small">{{ field.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+
+                                <button type="submit" class="btn btn-warning mt-2">
+                                    <i class="bi bi-key me-2"></i>Actualizar Contraseña
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="list-cursos" role="tabpanel">
+                        <div class="card card-perfil p-4">
+                            
+                            <div class="mb-5 bg-light p-4 rounded-3 border">
+                                <h5 class="fw-bold text-ucn mb-3"><i class="bi bi-star-fill me-2 text-warning"></i>Curso Principal</h5>
+                                <p class="text-muted small mb-3">Selecciona el curso que deseas ver en tu panel de inicio por defecto.</p>
+                                
+                                <form method="POST" class="d-flex gap-2 align-items-center flex-wrap">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="save_settings" value="true">
+                                    
+                                    <select name="curso_activo" class="form-select w-auto flex-grow-1">
+                                        {% for curso in cursos_inscritos %}
+                                            <option value="{{ curso.id }}" 
+                                                {% if estudiante.curso_activo.id == curso.id %}selected{% endif %}>
+                                                {{ curso.nombre }}
+                                            </option>
+                                        {% empty %}
+                                            <option disabled selected>No tienes cursos inscritos</option>
+                                        {% endfor %}
+                                    </select>
+                                    
+                                    <button type="submit" class="btn btn-primary text-nowrap">
+                                        <i class="bi bi-check2 me-1"></i>Guardar Selección
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                                <h5 class="fw-bold text-ucn mb-0">Historial de Inscripciones</h5>
+                                <a href="{% url 'cursos_disponibles' %}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    Ver Disponibles <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+
+                            {% if cursos_inscritos %}
+                                <div class="list-group">
+                                    {% for curso in cursos_inscritos %}
+                                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="fw-bold mb-1">{{ curso.nombre }}</h6>
+                                                <small class="text-muted">{{ curso.descripcion|truncatechars:50 }}</small>
+                                            </div>
+                                            {% if estudiante.curso_activo.id == curso.id %}
+                                                <span class="badge bg-primary rounded-pill">Principal</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary rounded-pill bg-opacity-25 text-dark">Inscrito</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-light text-center border">
+                                    No estás inscrito en ningún curso actualmente.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="list-ajustes" role="tabpanel">
+                        <div class="card card-perfil p-4">
+                            <h5 class="fw-bold text-ucn mb-4 border-bottom pb-2">Preferencias de Visualización</h5>
+                            
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="save_settings" value="true">
+                                <input type="hidden" name="ajustes_generales" value="true"> 
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h6 class="fw-bold mb-1"><i class="bi bi-moon-stars me-2"></i>Modo Oscuro</h6>
+                                        <small class="text-muted">Cambia la apariencia a tonos oscuros.</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="modo_oscuro" 
+                                               {% if estudiante.modo_oscuro %}checked{% endif %}>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <h6 class="fw-bold mb-1"><i class="bi bi-info-circle-fill me-2"></i>Ocultar Instrucciones</h6>
+                                        <small class="text-muted">Oculta las ayudas en los casos clínicos.</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="ocultar_instrucciones" 
+                                               {% if estudiante.ocultar_instrucciones %}checked{% endif %}>
+                                    </div>
+                                </div>
+
+                                <div class="text-end mt-5">
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
+                                        Aplicar Cambios
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Añadir clase form-control a los inputs del cambio de contraseña para que se vean bien
+    document.addEventListener("DOMContentLoaded", function() {
+        const passwordInputs = document.querySelectorAll('#list-datos input[type="password"]');
+        passwordInputs.forEach(input => input.classList.add('form-control'));
+    });
+</script>
+{% endblock %}

@@ -108,6 +108,7 @@
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Motivo</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'preguntas_motivo' paciente.id %}" class="text-decoration-none text-muted">Anamnesis</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'etapa_sintomas' paciente.id %}" class="text-decoration-none text-muted">Síntomas</a></li>
                 <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Interrogatorio</li>
             </ol>

@@ -193,13 +193,15 @@ def resumen_evaluacion(request, paciente_id):
                 [docente_email],
                 fail_silently=False,
             )
+            evaluacion.estado = 'finalizada'
+            evaluacion.save()
             messages.success(request, '¡Evaluación enviada exitosamente al docente!')
             
             # Limpiar sesión
             if 'inicio_evaluacion' in request.session:
                 del request.session['inicio_evaluacion']
                 
-            return redirect('inicio_estudiante')
+            return redirect('sala_espera', caso_id=paciente.caso.id)
             
         except Exception as e:
             messages.error(request, f'Error al enviar: {e}')

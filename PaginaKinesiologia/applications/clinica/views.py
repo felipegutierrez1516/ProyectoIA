@@ -27,12 +27,22 @@ def detalle_caso(request, caso_id):
 def sala_espera(request, caso_id):
     caso = get_object_or_404(Caso, id=caso_id)
     pacientes = Paciente_Ficticio.objects.filter(caso=caso)[:5]
-    # Otros casos del mismo curso para la barra lateral
     casos = Caso.objects.filter(curso=caso.curso, estado='Activo')
+
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
+
+    evaluaciones_realizadas = Evaluacion.objects.filter(
+        estudiante=estudiante, 
+        paciente__in=pacientes,
+        estado='finalizada'
+    ).values_list('paciente_id', flat=True)
+
     return render(request, 'clinica/sala_espera.html', {
         'caso': caso,
         'pacientes': pacientes,
-        'casos': casos 
+        'casos': casos,
+        'pacientes_evaluados': list(evaluaciones_realizadas)
     })
 
 # Inicio de evaluación (Motivo Consulta)
