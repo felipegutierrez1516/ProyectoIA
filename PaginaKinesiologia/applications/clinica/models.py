@@ -33,6 +33,28 @@ class Etapa(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nombre}"
+    
+    @property
+    def video_embed_url(self):
+        """
+        Transforma la URL normal de YouTube a formato Embed.
+        Soporta:
+        - https://www.youtube.com/watch?v=ID
+        - https://youtu.be/ID (Formato corto común al compartir)
+        """
+        url = self.video
+        if not url:
+            return ""
+            
+        # Lógica del repositorio "prueba_video" adaptada
+        if "watch?v=" in url:
+            return url.replace("watch?v=", "embed/")
+        
+        # Agrego esta mejora porque YouTube a veces da links cortos
+        if "youtu.be/" in url:
+            return url.replace("youtu.be/", "www.youtube.com/embed/")
+            
+        return url
 
 
 class Tema_Interrogacion(models.Model):

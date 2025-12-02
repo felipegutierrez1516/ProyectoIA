@@ -14,11 +14,11 @@
         border: 1px solid #ced4da;
         border-radius: 8px;
         padding: 20px;
-        font-size: 1.05rem; /* Letra un poco más grande para leer mejor */
+        font-size: 1.05rem; 
         line-height: 1.6;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        resize: vertical; /* Permite estirar solo verticalmente */
-        min-height: 300px; /* Altura inicial generosa */
+        resize: vertical; 
+        min-height: 300px; 
     }
 
     .form-control-diagnostico:focus {
@@ -62,7 +62,7 @@
             <ol class="breadcrumb mb-2 small">
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Motivo</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Evaluación</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'preguntas_motivo' paciente.id %}" class="text-decoration-none text-muted">Anamnesis</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'etapa_sintomas' paciente.id %}" class="text-decoration-none text-muted">Síntomas</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'preguntas_sintomas' paciente.id %}" class="text-decoration-none text-muted">Interrogatorio</a></li>
@@ -72,7 +72,9 @@
         </nav>
 
         <div class="card shadow border-0 rounded-3 bg-white">
-            <div class="card-body p-4 p-md-4"> <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+            <div class="card-body p-4 p-md-4"> 
+                
+                <div class="d-flex align-items-center mb-4 border-bottom pb-3">
                     <div class="bg-light rounded-circle p-2 text-ucn me-3 d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
                         <i class="bi bi-file-medical-fill fs-3"></i>
                     </div>
@@ -95,12 +97,13 @@
                         <label for="diagnostico" class="form-label fw-bold text-secondary mb-2">
                             <i class="bi bi-pen me-2"></i>Escribe tu hipótesis diagnóstica:
                         </label>
+                        
                         <textarea 
                             name="diagnostico" 
                             id="diagnostico" 
                             class="form-control form-control-diagnostico" 
                             placeholder="Basado en la anamnesis y el examen físico, describe aquí tu diagnóstico kinésico detallado..."
-                            required></textarea>
+                            required>{{ evaluacion.diagnostico|default:'' }}</textarea>
                     </div>
 
                 </form>
@@ -121,4 +124,35 @@
         </div>
     </div>
 </div>
+
+<script>
+    const txtDiagnostico = document.getElementById('diagnostico');
+    const pacienteId = "{{ paciente.id }}";
+
+    // Guardar automáticamente cuando el usuario quita el foco del área de texto (blur)
+    txtDiagnostico.addEventListener('blur', function() {
+        const texto = this.value;
+        
+        // Enviamos al endpoint de resumen, que ya maneja el guardado del diagnóstico por POST
+        // Nota: Esto funciona porque tu vista 'resumen_evaluacion' guarda el diagnóstico si viene en el POST
+        // antes de hacer cualquier redirección. Aunque la vista intente redirigir, el fetch no seguirá
+        // la redirección visualmente, pero la acción de guardado en BD ocurrirá.
+        
+        if(texto.trim().length > 0){
+            fetch("{% url 'resumen_evaluacion' paciente.id %}", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                // Enviamos 'diagnostico' y un flag opcional si quisieras manejarlo distinto en el futuro
+                body: "diagnostico=" + encodeURIComponent(texto)
+            }).then(response => {
+                console.log("Diagnóstico auto-guardado en segundo plano.");
+            }).catch(error => {
+                console.error("Error al auto-guardar:", error);
+            });
+        }
+    });
+</script>
 {% endblock %}

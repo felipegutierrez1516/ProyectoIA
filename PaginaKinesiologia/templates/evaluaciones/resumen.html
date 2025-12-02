@@ -14,12 +14,13 @@
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         transition: transform 0.2s;
-        padding: 1.2rem !important; /* Padding reducido */
+        padding: 1.2rem !important;
+        background-color: #fff;
     }
     .score-card:hover { transform: translateY(-2px); }
     
     .score-icon {
-        width: 40px; /* Más pequeño */
+        width: 40px;
         height: 40px;
         border-radius: 50%;
         display: flex;
@@ -29,9 +30,10 @@
         margin-bottom: 0.5rem;
     }
 
-    .card-motivo .score-icon { background-color: #e3f2fd; color: #1976d2; }
-    .card-sintomas .score-icon { background-color: #e8f5e9; color: #388e3c; }
-    .card-examen .score-icon { background-color: #fff3e0; color: #f57c00; }
+    /* Colores automáticos para las tarjetas (usando nth-child) */
+    .col-md-4:nth-child(1) .score-icon { background-color: #e3f2fd; color: #1976d2; } /* Motivo */
+    .col-md-4:nth-child(2) .score-icon { background-color: #e8f5e9; color: #388e3c; } /* Síntomas */
+    .col-md-4:nth-child(3) .score-icon { background-color: #fff3e0; color: #f57c00; } /* Examen */
 
     /* Diagnóstico */
     .diagnostico-box {
@@ -42,28 +44,46 @@
         font-size: 0.95rem;
     }
 
-    /* Botón Final Compacto */
+    /* Botones */
     .btn-enviar {
         background-color: #28a745;
         color: white;
-        border-radius: 50px;
-        padding: 8px 30px;
+        border-radius: 8px;
+        padding: 8px 25px; /* Un poco más grande para destacar */
         font-weight: 600;
-        font-size: 1rem;
-        border: none;
+        font-weight: 600;
+        border: 1px solid #28a745;
         transition: all 0.3s;
     }
     .btn-enviar:hover {
         background-color: #218838;
         transform: scale(1.02);
         color: white;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-volver {
+        border-radius: 8px; /* Igual que el resto de la app */
+        padding: 8px 25px;
+        font-weight: 500;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        background-color: transparent;
+        transition: all 0.2s;
+    }
+    .btn-volver:hover { 
+        background-color: #e2e6ea; 
+        color: #333; 
+        text-decoration: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mb-5">
-    <div class="col-lg-9"> <nav aria-label="breadcrumb">
+    <div class="col-lg-9"> 
+        
+        <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-3 small">
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
@@ -79,43 +99,47 @@
 
         <div class="text-center mb-4">
             <h3 class="fw-bold text-ucn mb-1">Resultados de Evaluación</h3>
-            <p class="text-muted small">Paciente: {{ paciente.nombre }}</p>
+            <p class="text-muted small">
+                Paciente: {{ paciente.nombre }} 
+                <span class="mx-2">|</span> {{ evaluacion.fecha_evaluacion|date:"d M Y" }}
+            </p>
         </div>
 
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 justify-content-center">
             
+            {% for etapa in desglose_etapas %}
             <div class="col-md-4">
-                <div class="card score-card card-motivo text-center h-100">
+                <div class="card score-card text-center h-100">
                     <div class="d-flex justify-content-center">
-                        <div class="score-icon"><i class="bi bi-chat-quote-fill"></i></div>
+                        <div class="score-icon">
+                            {% if "Motivo" in etapa.nombre %}
+                                <i class="bi bi-chat-quote-fill"></i>
+                            {% elif "síntomas" in etapa.nombre|lower %}
+                                <i class="bi bi-activity"></i>
+                            {% elif "examen" in etapa.nombre|lower %}
+                                <i class="bi bi-person-bounding-box"></i>
+                            {% else %}
+                                <i class="bi bi-clipboard-check"></i>
+                            {% endif %}
+                        </div>
                     </div>
-                    <h6 class="fw-bold mb-1">Motivo</h6>
-                    <div class="h4 fw-bold my-1 text-dark">{{ score_motivo.correctas }}/{{ score_motivo.total }}</div>
-                    <small class="text-muted" style="font-size: 0.75rem;">Aciertos</small>
+                    <h6 class="fw-bold mb-1">{{ etapa.nombre }}</h6>
+                    
+                    <div class="h4 fw-bold my-1 text-dark">
+                        {{ etapa.aciertos }}/{{ etapa.intentos }}
+                    </div>
+                    
+                    <small class="text-muted" style="font-size: 0.75rem;">
+                        {% if "examen" in etapa.nombre|lower %}Hallazgos{% else %}Aciertos{% endif %}
+                    </small>
                 </div>
             </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning text-center">No hay datos de etapas registrados.</div>
+            </div>
+            {% endfor %}
 
-            <div class="col-md-4">
-                <div class="card score-card card-sintomas text-center h-100">
-                    <div class="d-flex justify-content-center">
-                        <div class="score-icon"><i class="bi bi-activity"></i></div>
-                    </div>
-                    <h6 class="fw-bold mb-1">Síntomas</h6>
-                    <div class="h4 fw-bold my-1 text-dark">{{ score_sintomas.correctas }}/{{ score_sintomas.total }}</div>
-                    <small class="text-muted" style="font-size: 0.75rem;">Aciertos</small>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card score-card card-examen text-center h-100">
-                    <div class="d-flex justify-content-center">
-                        <div class="score-icon"><i class="bi bi-person-bounding-box"></i></div>
-                    </div>
-                    <h6 class="fw-bold mb-1">Examen Físico</h6>
-                    <div class="h4 fw-bold my-1 text-dark">{{ score_examen.correctas }}/{{ score_examen.total }}</div>
-                    <small class="text-muted" style="font-size: 0.75rem;">Hallazgos</small>
-                </div>
-            </div>
         </div>
 
         <div class="card shadow-sm border-0 rounded-3 mb-4">
@@ -126,14 +150,20 @@
                         <h6 class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Tiempo Total</h6>
                         <div class="d-flex align-items-center justify-content-center text-ucn">
                             <i class="bi bi-clock fs-5 me-2"></i>
-                            <span class="h4 fw-bold mb-0">{{ tiempo_total }}</span>
+                            <span class="h4 fw-bold mb-0">
+                                {% if evaluacion.tiempo_total %}
+                                    {{ evaluacion.tiempo_total|stringformat:"s"|slice:":8" }}
+                                {% else %}
+                                    00:00:00
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     <div class="col-6 text-center">
                         <h6 class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Puntaje Global</h6>
                         <div class="d-flex align-items-center justify-content-center text-primary">
                             <i class="bi bi-trophy fs-5 me-2"></i>
-                            <span class="h4 fw-bold mb-0">{{ total_correctas }} / {{ total_preguntas }}</span>
+                            <span class="h4 fw-bold mb-0">{{ correctas }} / {{ total_intentos }}</span>
                         </div>
                     </div>
                 </div>
@@ -144,11 +174,20 @@
                     <i class="bi bi-file-medical me-2"></i>Tu Diagnóstico
                 </h6>
                 <div class="diagnostico-box shadow-sm mb-4">
-                    <p class="mb-0 text-dark fst-italic small" style="white-space: pre-wrap;">{{ evaluacion.diagnostico }}</p>
+                    {% if evaluacion.diagnostico %}
+                        <p class="mb-0 text-dark fst-italic small" style="white-space: pre-wrap;">{{ evaluacion.diagnostico }}</p>
+                    {% else %}
+                        <p class="mb-0 text-muted fst-italic small">Sin diagnóstico registrado.</p>
+                    {% endif %}
                 </div>
 
-                <div class="text-center mt-4">
-                    <form method="POST">
+                <div class="d-flex justify-content-between align-items-center pt-4 mt-3 border-top">
+                    
+                    <a href="{% url 'vista_diagnostico' paciente.id %}" class="btn btn-outline-secondary btn-volver shadow-sm">
+                        <i class="bi bi-pencil me-2"></i>Editar Diagnóstico
+                    </a>
+
+                    <form method="POST" action="{% url 'inicio_estudiante' %}" class="m-0"> 
                         {% csrf_token %}
                         <input type="hidden" name="enviar_correo" value="true">
                         
@@ -156,12 +195,7 @@
                             Finalizar y Enviar <i class="bi bi-send-check ms-2"></i>
                         </button>
                     </form>
-                    
-                    <div class="mt-2">
-                        <a href="{% url 'vista_diagnostico' paciente.id %}" class="text-decoration-none text-muted" style="font-size: 0.8rem;">
-                            <i class="bi bi-pencil me-1"></i>Editar Diagnóstico
-                        </a>
-                    </div>
+
                 </div>
 
             </div>

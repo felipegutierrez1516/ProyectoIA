@@ -64,7 +64,7 @@
         color: #c62828;
     }
 
-    /* BOTONES */
+    /* BOTONES DE NAVEGACIÓN */
     .btn-siguiente {
         background-color: #003057;
         color: white;
@@ -144,37 +144,54 @@
                     {% for pregunta in preguntas %}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{ pregunta.id }}">
-                                <button class="accordion-button collapsed" type="button" 
+                                
+                                <button class="accordion-button collapsed
+                                            {% if pregunta.respondida %}
+                                                {% if pregunta.fue_correcta %}pregunta-correcta{% else %}pregunta-incorrecta{% endif %}
+                                            {% endif %}" 
+                                        type="button" 
                                         data-id="{{ pregunta.id }}"
                                         data-bs-toggle="collapse" 
                                         data-bs-target="#collapse{{ pregunta.id }}" 
                                         aria-expanded="false" 
                                         aria-controls="collapse{{ pregunta.id }}"
-                                        onclick="verificarRespuesta(this, '{{ pregunta.es_correcta|yesno:'true,false' }}', '{{ pregunta.id }}')">
+
+                                        onclick="verificarRespuesta(this, '{{ pregunta.es_correcta|yesno:'true,false' }}', '{{ pregunta.id }}', '{{ pregunta.respondida|yesno:'true,false' }}')"
+                                        
+                                        >
                                     
-                                    <span class="me-2"><i class="bi bi-question-circle"></i></span>
+                                    <span class="me-2">
+                                        {% if pregunta.respondida %}
+                                            {% if pregunta.fue_correcta %}
+                                                <i class="bi bi-check-circle-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-x-circle-fill"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="bi bi-question-circle"></i>
+                                        {% endif %}
+                                    </span>
                                     {{ pregunta.pregunta }}
                                 </button>
                             </h2>
-                            <div id="collapse{{ pregunta.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ pregunta.id }}" data-bs-parent="#accordionPreguntas">
+                            
+                            <div id="collapse{{ pregunta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionPreguntas">
                                 <div class="accordion-body">
-                                    
                                     <div class="mb-2">
                                         <strong class="text-ucn">{{ paciente.nombre }}:</strong>
                                         <span class="fst-italic">"{{ pregunta.respuesta }}"</span>
                                     </div>
-
-                                    {% if not pregunta.es_correcta %}
+                                    {% if pregunta.respondida and not pregunta.fue_correcta %}
                                         <div class="justificacion-box rounded">
                                             <strong><i class="bi bi-exclamation-circle me-1"></i> Retroalimentación:</strong> 
                                             {{ pregunta.justificacion_error }}
                                         </div>
-                                    {% else %}
+                                    {% endif %}
+                                    {% if pregunta.respondida and pregunta.fue_correcta %}
                                         <div class="mt-3 text-success small fw-bold">
-                                            <i class="bi bi-check-circle-fill me-1"></i> ¡Correcto! Has desbloqueado el siguiente paso.
+                                            <i class="bi bi-check-circle-fill me-1"></i> ¡Correcto!
                                         </div>
                                     {% endif %}
-
                                 </div>
                             </div>
                         </div>
@@ -201,23 +218,40 @@
 {% endblock %}
 
 {% block extra_js %}
-// BLOQUE JS MEJORADO
 <script>
-    let intentos = 0;
-    let aciertos = 0; // 0 o 1
+    // INICIALIZACIÓN DE VARIABLES CON DATOS DEL BACKEND
+    let intentos = {{ intentos_previos|default:0 }};
+    // Convertimos el booleano de python a 1 o 0 para JS
+    let aciertos = {% if ya_acerto %}1{% else %}0{% endif %};
+    
     const pacienteId = "{{ paciente.id }}";
 
-    function verificarRespuesta(boton, esCorrectaStr, preguntaId) {
-        // Evitar clic repetido visual en el mismo botón
+    document.addEventListener("DOMContentLoaded", function() {
+        // Si no ha acertado, mostramos X/intentos. Si ya acertó, mostramos 1/intentos.
+        if (aciertos === 1) {
+             document.getElementById('contadorTexto').innerText = "1/" + intentos;
+             desbloquearSiguiente();
+        } else {
+             document.getElementById('contadorTexto').innerText = "0/" + intentos;
+        }
+    });
+
+function verificarRespuesta(boton, esCorrectaStr, preguntaId, yaRespondidaStr) {
+        
+        // 1. SI YA FUE RESPONDIDA (Viene del backend como True):
+        // Permitimos que Bootstrap abra/cierre el acordeón, pero NO hacemos nada más.
+        if (yaRespondidaStr === 'true') {
+            return; // Salimos de la función inmediatamente.
+        }
+
+        // 2. SI YA LA RESPONDIÓ EN ESTE MISMO INSTANTE (Clase CSS):
         if (boton.classList.contains('pregunta-correcta') || boton.classList.contains('pregunta-incorrecta')) {
             return; 
         }
 
+        // --- Lógica normal de guardado (solo si es nueva respuesta) ---
         const esCorrecta = (esCorrectaStr === 'true');
 
-        // LÓGICA DEL CONTADOR (Problema 1 Solucionado)
-        // Solo sumamos intentos si AÚN NO HEMOS ACERTADO.
-        // Si ya acertaste (aciertos=1), puedes seguir explorando las incorrectas sin que sume al contador.
         if (aciertos === 0) {
             intentos++;
             if (esCorrecta) {
@@ -226,26 +260,24 @@
             document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
         }
 
-        // CAMBIOS VISUALES
         const icono = boton.querySelector('.bi');
         if (esCorrecta) {
             boton.classList.add('pregunta-correcta');
             icono.classList.remove('bi-question-circle');
             icono.classList.add('bi-check-circle-fill');
-            
-            // Desbloquear botón
-            const btn = document.getElementById('btnSiguiente');
-            const iconCandado = document.getElementById('iconCandado');
-            btn.classList.remove('btn-disabled-lock', 'disabled');
-            iconCandado.classList.remove('bi-lock-fill');
-            iconCandado.classList.add('bi-arrow-right');
+            desbloquearSiguiente();
         } else {
             boton.classList.add('pregunta-incorrecta');
             icono.classList.remove('bi-question-circle');
             icono.classList.add('bi-x-circle-fill');
         }
+        
+        // Forzamos apertura del acordeón para ver el feedback inmediato
+        const targetId = boton.getAttribute('data-bs-target');
+        const collapseElement = document.querySelector(targetId);
+        const bsCollapse = new bootstrap.Collapse(collapseElement, { show: true });
 
-        // GUARDAR EN BASE DE DATOS (Problema 3 Solucionado)
+        // AJAX solo si es nueva
         fetch("{% url 'guardar_respuesta_ajax' %}", {
             method: "POST",
             headers: {
@@ -258,6 +290,16 @@
                 es_correcta: esCorrecta
             })
         });
+    }
+
+    function desbloquearSiguiente() {
+        const btn = document.getElementById('btnSiguiente');
+        const iconCandado = document.getElementById('iconCandado');
+        if(btn) {
+            btn.classList.remove('btn-disabled-lock', 'disabled');
+            iconCandado.classList.remove('bi-lock-fill');
+            iconCandado.classList.add('bi-arrow-right');
+        }
     }
 </script>
 {% endblock %}

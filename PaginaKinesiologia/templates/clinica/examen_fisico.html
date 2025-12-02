@@ -10,7 +10,6 @@
     .text-ucn { color: #003057 !important; }
 
     /* Contenedor de la Imagen */
-    /* IMPORTANTE: display: inline-block hace que el div se ajuste al tamaño de la imagen */
     .cuerpo-container {
         position: relative;
         display: inline-block; 
@@ -18,8 +17,8 @@
         border: 1px solid #e0e0e0;
         border-radius: 10px;
         background-color: #fff;
-        padding: 0; /* Quitamos padding para que los puntos sean precisos */
-        overflow: hidden; /* Corta cualquier punto que intente salirse */
+        padding: 0;
+        overflow: hidden;
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
@@ -40,8 +39,6 @@
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        
-        /* Centra el punto en la coordenada exacta */
         transform: translate(-50%, -50%); 
         z-index: 10;
     }
@@ -52,7 +49,6 @@
         z-index: 20;
     }
     
-    /* Animación de pulso */
     .hotspot::after {
         content: '';
         position: absolute;
@@ -133,7 +129,7 @@
             <ol class="breadcrumb mb-2 small">
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Motivo</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Evaluación</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'preguntas_motivo' paciente.id %}" class="text-decoration-none text-muted">Anamnesis</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'etapa_sintomas' paciente.id %}" class="text-decoration-none text-muted">Síntomas</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'preguntas_sintomas' paciente.id %}" class="text-decoration-none text-muted">Interrogatorio</a></li>
@@ -220,35 +216,41 @@
 {% url 'vista_diagnostico' paciente.id as url_diagnostico %}
 
 <script>
-    let intentos = 0;
-    let aciertos = 0;
+    // Recuperar datos del backend
+    let intentos = {{ intentos_previos|default:0 }};
+    let aciertos = {% if ya_acerto %}1{% else %}0{% endif %};
     const pacienteId = "{{ paciente.id }}";
     
-    // Set para recordar IDs de puntos ya clickeados (evita contar doble)
-    // Usaremos el nombre de la parte como ID único
-    let partesVisitadas = new Set(); 
+    // Lista de partes ya visitadas (nombres) que viene de la vista como JSON
+    const partesPrevias = {{ partes_visitadas|safe }};
+    let partesVisitadas = new Set(partesPrevias); 
 
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    document.addEventListener("DOMContentLoaded", function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Restaurar contador visualmente
+        if (aciertos === 1) {
+             document.getElementById('contadorTexto').innerText = "1/" + intentos;
+        } else {
+             document.getElementById('contadorTexto').innerText = "0/" + intentos;
+        }
+    });
 
     function evaluarParte(nombreParte, esCorrectaStr, descripcion) {
-        const feedbackContainer = document.getElementById('feedback');
         
-        // 1. CONTROL DE REPETICIÓN VISUAL (Problema 2 Solucionado)
-        // Si ya visitamos esta parte, solo mostramos el feedback visual pero NO sumamos intentos ni guardamos en BD
+        // 1. Si ya visitamos esta parte, solo mostramos el feedback visual (sin guardar, sin sumar)
         if (partesVisitadas.has(nombreParte)) {
-            // Solo actualizamos la tarjeta de feedback para recordarle al usuario qué era
-            mostrarFeedback(nombreParte, esCorrectaStr, descripcion, false); // false = no es nuevo intento
+            mostrarFeedback(nombreParte, esCorrectaStr, descripcion, false); // false = no es nuevo
             return; 
         }
 
-        // Si es la primera vez que toca este punto:
+        // Es nuevo intento
         partesVisitadas.add(nombreParte);
 
-        // Lógica del Contador:
-        // Solo sumamos intentos si AÚN NO HEMOS ACERTADO.
+        // Lógica Contador
         if (aciertos === 0) {
             intentos++;
         }
@@ -259,13 +261,11 @@
             aciertos = 1; 
         }
 
-        // Actualizar Texto Contador
         document.getElementById('contadorTexto').innerText = aciertos + "/" + intentos;
 
-        // Mostrar Feedback Visual
         mostrarFeedback(nombreParte, esCorrectaStr, descripcion, true);
 
-        // Guardar en BD (Solo la primera vez que se toca)
+        // Guardar en BD
         fetch("{% url 'guardar_respuesta_ajax' %}", {
             method: "POST",
             headers: {
@@ -286,7 +286,6 @@
         const icono = isCorrect ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
         const tituloEstado = isCorrect ? 'Hallazgo Relevante' : 'Sin Hallazgos';
         
-        // El botón solo aparece si es correcto
         const mensajeAccion = isCorrect 
             ? `<div class="mt-4 pt-3 border-top border-success-subtle">
                  <p class="small fw-bold text-success mb-2">¡Hallazgo confirmado!</p>

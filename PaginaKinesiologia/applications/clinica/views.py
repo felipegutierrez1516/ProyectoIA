@@ -47,50 +47,68 @@ def sala_espera(request, caso_id):
 
 # Inicio de evaluación (Motivo Consulta)
 def evaluar_paciente(request, paciente_id):
+    # Esta vista renderiza el video del motivo de consulta
     paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
     etapa = Etapa.objects.filter(paciente=paciente, nombre__icontains='motivo de consulta').first()
-
+    
     perfil = Perfil.objects.get(user=request.user)
     estudiante = Estudiante.objects.get(perfil=perfil)
 
-    # 1. Crear o recuperar evaluación
-    evaluacion, created = Evaluacion.objects.get_or_create(
-        estudiante=estudiante,
-        paciente=paciente,
-        defaults={
-            'nombre': f"Evaluación de {paciente.nombre}",
-            'descripcion': f"Evaluación clínica para {paciente.nombre}",
-            'fecha_evaluacion': timezone.now().date(),
-            'diagnostico': '',
-            'tiempo_total': timezone.timedelta(0),
-        }
-    )
-
-    # 2. Reiniciar reloj SIEMPRE al entrar aquí (Inicio del flujo)
-    request.session['inicio_evaluacion'] = timezone.now().isoformat()
+    # Solo buscamos la activa. Si el usuario intenta entrar aquí directamente sin pasar por
+    # iniciar_evaluacion (por url directa), lo mandamos al inicio para que se cree bien.
+    evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente, estado='en_curso').first()
     
-    # Opcional: Limpiar respuestas previas si quieres que empiece de cero real
-    Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion).delete()
+    if not evaluacion:
+        return redirect('iniciar_evaluacion', paciente_id=paciente.id)
 
     return render(request, 'clinica/motivo_consulta.html', {
         'paciente': paciente,
-        'etapa': etapa
+        'etapa': etapa,
+        'evaluacion_id': evaluacion.id
     })
 
-# Preguntas Motivo (Solo Lectura - El guardado es por AJAX)
+
+# Preguntas Motivo
 def preguntas_motivo(request, paciente_id):
     paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
     etapa = Etapa.objects.filter(paciente=paciente, nombre__icontains='motivo de consulta').first()
+    
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
+    
+    # CORRECCIÓN 2: Obtener solo la evaluación 'en_curso'
+    evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente, estado='en_curso').first()
+
     preguntas = Tema_Interrogacion.objects.filter(etapa=etapa) if etapa else []
     
-    # Calculamos cuántas correctas hay para el JS
-    preguntas_correctas_count = preguntas.filter(es_correcta=True).count()
+    intentos_realizados = 0
+    ya_acerto = False
+
+    if evaluacion:
+        # Recuperar historial de respuestas SOLO para esta etapa
+        respuestas_db = Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion, etapa=etapa)
+        
+        # CORRECCIÓN 5: Contar intentos reales para enviarlos al template
+        intentos_realizados = respuestas_db.count()
+        
+        historial = {r.descripcion: r.correcta for r in respuestas_db}
+        
+        if respuestas_db.filter(correcta=True).exists():
+            ya_acerto = True
+
+        for p in preguntas:
+            if p.pregunta in historial:
+                p.respondida = True
+                p.fue_correcta = historial[p.pregunta]
+            else:
+                p.respondida = False
 
     return render(request, 'clinica/preguntas_motivo.html', {
         'paciente': paciente,
         'etapa': etapa,
         'preguntas': preguntas,
-        'preguntas_correctas_count': preguntas_correctas_count
+        'intentos_previos': intentos_realizados, # Enviamos esto para que el JS sepa en qué número empezar (1/2, etc.)
+        'ya_acerto': ya_acerto
     })
 
 # Etapa Síntomas (Video)
@@ -98,32 +116,50 @@ def etapa_sintomas(request, paciente_id):
     paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
     etapa = Etapa.objects.filter(paciente=paciente, nombre__icontains='síntomas').first()
 
-    video_id = None
-    if etapa and etapa.video:
-        if 'watch?v=' in etapa.video:
-            video_id = etapa.video.split('watch?v=')[-1]
-        elif 'youtu.be/' in etapa.video:
-            video_id = etapa.video.split('youtu.be/')[-1]
-
     return render(request, 'clinica/etapa_sintomas.html', {
         'paciente': paciente,
         'etapa': etapa,
-        'video_id': video_id
     })
 
-# Preguntas Síntomas (Solo Lectura)
+# Preguntas Síntomas
 def preguntas_sintomas(request, paciente_id):
     paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
     etapa = Etapa.objects.filter(paciente=paciente, nombre__icontains='síntomas').first()
+    
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
+    
+    # CORRECCIÓN: Filtro estricto por en_curso
+    evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente, estado='en_curso').first()
+
     preguntas = Tema_Interrogacion.objects.filter(etapa=etapa) if etapa else []
     
-    preguntas_correctas_count = preguntas.filter(es_correcta=True).count()
+    intentos_realizados = 0
+    ya_acerto = False
 
+    if evaluacion:
+        respuestas_db = Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion, etapa=etapa)
+        
+        # CORRECCIÓN 5: Contar intentos para esta etapa
+        intentos_realizados = respuestas_db.count()
+        historial = {r.descripcion: r.correcta for r in respuestas_db}
+        
+        if respuestas_db.filter(correcta=True).exists():
+            ya_acerto = True
+        
+        for p in preguntas:
+            if p.pregunta in historial:
+                p.respondida = True
+                p.fue_correcta = historial[p.pregunta]
+            else:
+                p.respondida = False
+    
     return render(request, 'clinica/preguntas_sintomas.html', {
         'paciente': paciente,
         'etapa': etapa,
         'preguntas': preguntas,
-        'preguntas_correctas_count': preguntas_correctas_count
+        'intentos_previos': intentos_realizados,
+        'ya_acerto': ya_acerto
     })
 
 # Examen Físico
@@ -131,26 +167,38 @@ def examen_fisico(request, paciente_id):
     paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
     etapa = Etapa.objects.filter(paciente=paciente, nombre__icontains='examen físico').first()
     
-    # --- LÓGICA DE PORCENTAJES PARA PUNTOS INTERACTIVOS ---
-    # Usamos COORDS_MAP del modelo para generar la lista 'partes'
-    # Asumiendo que COORDS_MAP ya tiene valores en porcentaje (0-100)
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
     
-    # Recuperamos partes guardadas en BD si existen, o usamos el mapa base
-    partes_bd = Partes_del_Cuerpo.objects.filter(etapa=etapa)
+    # CORRECCIÓN: Filtro estricto por en_curso
+    evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente, estado='en_curso').first()
+
+    partes_base = Partes_del_Cuerpo.objects.filter(etapa=etapa)
     
-    # Si no hay partes en BD, usamos el mapa estático para dibujar (opcional)
-    # Pero lo ideal es que uses 'partes_bd' si ya llenaste la BD con el script JS.
-    
+    partes_visitadas_nombres = []
+    intentos_realizados = 0
+    ya_acerto = False
+
+    if evaluacion and etapa:
+        respuestas = Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion, etapa=etapa)
+        
+        # CORRECCIÓN 3: Recuperar la lista de partes ya tocadas
+        partes_visitadas_nombres = list(respuestas.values_list('respuesta_estudiante', flat=True))
+        intentos_realizados = respuestas.count()
+        
+        if respuestas.filter(correcta=True).exists():
+            ya_acerto = True
+
     return render(request, 'clinica/examen_fisico.html', {
         'paciente': paciente,
         'etapa': etapa,
-        'partes': partes_bd # Enviamos las partes desde la BD
+        'partes': partes_base,
+        'partes_visitadas': json.dumps(partes_visitadas_nombres), # Enviamos al JS como JSON
+        'intentos_previos': intentos_realizados,
+        'ya_acerto': ya_acerto
     })
 
-# --- API AJAX PARA GUARDAR RESPUESTAS (La solución a tus problemas) ---
-
-# ... imports ...
-
+# API AJAX
 def registrar_respuesta_ajax(request):
     if request.method == 'POST':
         try:
@@ -164,24 +212,19 @@ def registrar_respuesta_ajax(request):
             perfil = Perfil.objects.get(user=request.user)
             estudiante = Estudiante.objects.get(perfil=perfil)
             
-            evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente).first()
+            # CORRECCIÓN CRÍTICA: Filtrar por estado='en_curso' para evitar guardar en evaluaciones viejas
+            evaluacion = Evaluacion.objects.filter(estudiante=estudiante, paciente=paciente, estado='en_curso').first()
+            
             if not evaluacion:
-                return JsonResponse({'status': 'error', 'message': 'No hay evaluación iniciada'}, status=400)
+                return JsonResponse({'status': 'error', 'message': 'No hay evaluación activa'}, status=400)
 
-            # -------------------------------------------------------------------------
-            # 1. IDENTIFICAR LA ETAPA ACTUAL
-            # -------------------------------------------------------------------------
             etapa_actual = None
             if pregunta_id:
                 tema = Tema_Interrogacion.objects.get(id=pregunta_id)
                 etapa_actual = tema.etapa
             elif nombre_parte:
-                # Ajusta el filtro según cómo nombras tus etapas en BD ('examen físico', 'Examen Fisico', etc.)
                 etapa_actual = Etapa.objects.filter(paciente=paciente, nombre__icontains='examen').first()
 
-            # -------------------------------------------------------------------------
-            # 2. EL CANDADO: ¿YA APROBÓ ESTA ETAPA?
-            # -------------------------------------------------------------------------
             if etapa_actual:
                 ya_gano = Respuesta_Evaluacion.objects.filter(
                     evaluacion=evaluacion,
@@ -189,20 +232,14 @@ def registrar_respuesta_ajax(request):
                     correcta=True
                 ).exists()
 
-                # SI YA ACERTÓ ANTES, NO GUARDAMOS NADA MÁS (Ni correcto ni incorrecto)
-                # Esto congela el contador del resumen en el momento del éxito.
                 if ya_gano:
-                    return JsonResponse({'status': 'ignored', 'message': 'Etapa ya finalizada exitosamente'})
+                    return JsonResponse({'status': 'ignored', 'message': 'Etapa ya finalizada'})
 
-            # -------------------------------------------------------------------------
-            # 3. GUARDAR LA RESPUESTA (Si no había ganado aún)
-            # -------------------------------------------------------------------------
-            
-            # CASO A: Preguntas
+            # Guardar Pregunta
             if pregunta_id:
                 tema = Tema_Interrogacion.objects.get(id=pregunta_id)
                 
-                # Evitar guardar doble click en la MISMA pregunta incorrecta
+                # Evitar duplicados
                 if Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion, descripcion=tema.pregunta).exists():
                      return JsonResponse({'status': 'ignored', 'message': 'Pregunta ya respondida'})
 
@@ -216,13 +253,11 @@ def registrar_respuesta_ajax(request):
                     puntaje_obtenido=1.0 if es_correcta else 0.0
                 )
 
-            # CASO B: Examen Físico
+            # Guardar Examen
             elif nombre_parte:
-                # Obtenemos la parte para guardar el nombre bonito
                 parte = Partes_del_Cuerpo.objects.filter(etapa=etapa_actual, nombre=nombre_parte).first()
                 display_name = parte.get_nombre_display() if parte else nombre_parte
 
-                # Evitar guardar doble click en la MISMA zona ya evaluada
                 if Respuesta_Evaluacion.objects.filter(evaluacion=evaluacion, respuesta_estudiante=nombre_parte).exists():
                     return JsonResponse({'status': 'ignored', 'message': 'Zona ya evaluada'})
 
@@ -242,3 +277,36 @@ def registrar_respuesta_ajax(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'invalid method'}, status=400)
+
+
+
+def iniciar_evaluacion(request, paciente_id):
+    paciente = get_object_or_404(Paciente_Ficticio, id=paciente_id)
+    perfil = Perfil.objects.get(user=request.user)
+    estudiante = Estudiante.objects.get(perfil=perfil)
+
+    # 1. Marcar como 'abandonada' cualquier evaluación previa que haya quedado 'en_curso'
+    #    (Esto hace que al volver a entrar, el intento anterior se "pierda/resetee" para el usuario)
+    Evaluacion.objects.filter(
+        estudiante=estudiante,
+        paciente=paciente,
+        estado='en_curso'
+    ).update(estado='abandonada') # O puedes usar .delete() si prefieres borrar el historial basura
+
+    # 2. Crear la NUEVA evaluación limpia
+    Evaluacion.objects.create(
+        estudiante=estudiante,
+        paciente=paciente,
+        nombre=f"Evaluación de {paciente.nombre}",
+        descripcion=f"Evaluación clínica para {paciente.nombre}",
+        fecha_evaluacion=timezone.now().date(),
+        diagnostico='',
+        tiempo_total=timezone.timedelta(0),
+        estado='en_curso'
+    )
+    
+    # 3. Reiniciar reloj
+    request.session['inicio_evaluacion'] = timezone.now().isoformat()
+
+    # 4. Redirigir al primer paso visual (Motivo de Consulta)
+    return redirect('motivo_consulta', paciente_id=paciente.id)

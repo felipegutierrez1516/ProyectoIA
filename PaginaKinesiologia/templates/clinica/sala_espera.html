@@ -5,11 +5,9 @@
 
 {% block extra_css %}
 <style>
-    /* Estilos UCN */
     .bg-ucn { background-color: #003057 !important; color: white; }
     .text-ucn { color: #003057 !important; }
 
-    /* Contenedor */
     .sala-container {
         position: relative;
         width: 100%;
@@ -27,7 +25,6 @@
         object-fit: cover;
     }
 
-    /* --- MARCADORES --- */
     .paciente-marker {
         position: absolute;
         top: 55%; 
@@ -46,18 +43,17 @@
         text-decoration: none;
     }
 
-    /* Estado NORMAL (Azul) */
     .marker-pendiente {
         background-color: #003057;
     }
+
     .marker-pendiente:hover {
         transform: scale(1.15) translateY(-5px);
         background-color: #004a87;
     }
 
-    /* Estado COMPLETADO (Verde) */
     .marker-completado {
-        background-color: #28a745 !important; /* Verde éxito */
+        background-color: #28a745 !important;
         border-color: #fff;
     }
     .marker-completado:hover {
@@ -65,7 +61,6 @@
         background-color: #218838 !important;
     }
     
-    /* Animación solo para pendientes */
     .marker-pendiente::after {
         content: '';
         position: absolute;
@@ -147,21 +142,30 @@
                 {% for paciente in pacientes %}
                     
                     {% if paciente.id in pacientes_evaluados %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" 
+                        <a href="{% url 'iniciar_evaluacion' paciente.id %}" 
                            class="paciente-marker marker-completado"
                            style="left: {% if forloop.counter == 1 %}15%{% elif forloop.counter == 2 %}32%{% elif forloop.counter == 3 %}49%{% elif forloop.counter == 4 %}66%{% else %}83%{% endif %};" 
-                           data-bs-toggle="tooltip" data-bs-html="true" 
-                           title="<strong>{{ paciente.nombre }}</strong><br>Evaluación Completada"
-                           onclick="return confirm('Ya has realizado esta evaluación clínica. ¿Estás seguro de que quieres realizarla nuevamente?');">
-                            <i class="bi bi-check-lg fs-4"></i>
+                           
+                           data-bs-toggle="tooltip" 
+                           data-bs-html="true" 
+                           data-bs-placement="top"
+                           title="<div class='text-center py-1'><strong>{{ paciente.nombre }}</strong><br><span class='text-light opacity-75'>{{ paciente.edad }} años</span><br><span class='badge bg-white text-success mt-1'>¡Completado!</span></div>"
+                           
+                           onclick="return confirm('Ya completaste este paciente. ¿Deseas evaluarlo nuevamente desde cero?');">
+                            <i class="bi bi-check-lg"></i>
                         </a>
+
                     {% else %}
-                        <a href="{% url 'motivo_consulta' paciente.id %}" 
+                        <a href="{% url 'iniciar_evaluacion' paciente.id %}" 
                            class="paciente-marker marker-pendiente"
                            style="left: {% if forloop.counter == 1 %}15%{% elif forloop.counter == 2 %}32%{% elif forloop.counter == 3 %}49%{% elif forloop.counter == 4 %}66%{% else %}83%{% endif %};" 
-                           data-bs-toggle="tooltip" data-bs-html="true" 
-                           title="<strong>{{ paciente.nombre }}</strong><br>{{ paciente.edad }} años">
-                            <i class="bi bi-person-fill fs-4"></i>
+                           
+                           data-bs-toggle="tooltip" 
+                           data-bs-html="true" 
+                           data-bs-placement="top"
+                           title="<div class='text-center py-1'><strong>{{ paciente.nombre }}</strong><br><span class='text-light opacity-75'>{{ paciente.edad }} años</span></div>">
+                            
+                            <i class="bi bi-person-fill"></i>
                         </a>
                     {% endif %}
 
@@ -181,7 +185,6 @@
 
 {% block extra_js %}
 <script>
-    // Inicializar Tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

@@ -23,5 +23,6 @@ urlpatterns = [
     path('examen_fisico/<int:paciente_id>/', views.examen_fisico, name='examen_fisico'),
 
     path('api/guardar_respuesta/', views.registrar_respuesta_ajax, name='guardar_respuesta_ajax'),
+    path('iniciar/<int:paciente_id>/', views.iniciar_evaluacion, name='iniciar_evaluacion'),
 ]
 
