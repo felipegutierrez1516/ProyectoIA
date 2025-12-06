@@ -107,8 +107,8 @@
             <ol class="breadcrumb mb-2 small">
                 <li class="breadcrumb-item"><a href="{% url 'inicio_estudiante' %}" class="text-decoration-none text-muted">Inicio</a></li>
                 <li class="breadcrumb-item"><a href="{% url 'sala_espera' paciente.caso.id %}" class="text-decoration-none text-muted">Sala de Espera</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Evaluación</a></li>
-                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Anamnesis</li>
+                <li class="breadcrumb-item"><a href="{% url 'motivo_consulta' paciente.id %}" class="text-decoration-none text-muted">Consulta</a></li>
+                <li class="breadcrumb-item active text-ucn fw-bold" aria-current="page">Preguntas Motivo</li>
             </ol>
         </nav>
 
@@ -136,7 +136,7 @@
 
                 <div class="alert alert-light border-start border-4 border-info shadow-sm mb-4">
                     <i class="bi bi-info-circle-fill text-info me-2"></i>
-                    <strong>Instrucción:</strong> Realiza las preguntas pertinentes. Si la pregunta es correcta, podrás avanzar a la siguiente etapa.
+                    <strong>Instrucción:</strong> Selecciona la pregunta adecuada para el caso del paciente, según lo relatado. Podrás avanzar a la siguiente etapa tras elegir la correcta.
                 </div>
 
                 <div class="accordion" id="accordionPreguntas">

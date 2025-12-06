@@ -26,6 +26,11 @@ class Evaluacion(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre} ({self.estado})"
 
+    class Meta:
+        verbose_name = "Evaluación"
+        verbose_name_plural = "Evaluaciones"
+
+
 
 class Respuesta_Evaluacion(models.Model):
     evaluacion = models.ForeignKey(Evaluacion, on_delete=models.CASCADE)
@@ -40,14 +45,6 @@ class Respuesta_Evaluacion(models.Model):
     def __str__(self):
         return f"{self.id}"
 
-
-class Envio_Docente(models.Model):
-    docente = models.ForeignKey(Docente, on_delete=models.CASCADE)
-    respuesta_evaluacion = models.ForeignKey(Respuesta_Evaluacion, on_delete=models.CASCADE)
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.CASCADE)
-    fecha_entrega = models.DateField()
-    estado_revision = models.CharField(max_length=15, choices=[('pendiente','Pendiente'),('revisado','Revisado'),('aprobado','Aprobado')])
-    comentario_docente = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.id}"
+    class Meta:
+        verbose_name = "Respuesta de Evaluación"
+        verbose_name_plural = "Respuestas de Evaluaciones"

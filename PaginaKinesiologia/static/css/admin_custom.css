@@ -1,105 +1,128 @@
 :root {
-  --ucn-blue: #003057;
-  --ucn-green: #65d7ad;
-  --ucn-green-dark: #4da885;
-  --light-bg: #f4f6f9;
+  --primary: #003057;
+  --secondary: #65d7ad;
+  --background: #F2F2F2;
 }
 
-/* 1. SUAVIZAR EL FONDO Y LA FUENTE */
-body {
-    background-color: var(--light-bg);
-    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+/* ======= Cabecera y sidebar ======= */
+.main-header {
+  background-color: var(--primary) !important;
+  color: white !important;
 }
 
-/* 2. TARJETAS (CARDS) MODERNAS CON SOMBRA */
-.card {
-    border: none !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-    transition: transform 0.2s;
+.navbar .nav-link i,
+.main-header i,
+.navbar a,
+.navbar-brand,
+.navbar .nav-link {
+  color: white !important;
 }
 
-/* 3. CABECERAS DE TABLAS MODERNAS */
-.card-primary.card-outline {
-    border-top: 3px solid var(--ucn-blue) !important;
+/* ======= Sidebar ======= */
+.main-sidebar {
+  background-color: var(--primary) !important;
+  color: white !important;
 }
 
-table.table thead th {
-    background-color: #f8f9fa !important;
-    color: var(--ucn-blue) !important;
-    border-bottom: 2px solid #dee2e6 !important;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
+.main-sidebar a {
+  color: white !important;
 }
 
-/* Hover en filas de tablas */
-table.table tbody tr:hover {
-    background-color: rgba(101, 215, 173, 0.1) !important; /* Verde UCN muy suave */
+.main-sidebar a:hover {
+  background-color: var(--secondary) !important;
+  color: white !important;
 }
 
-/* 4. BOTONES REDONDEADOS Y SUAVES */
-.btn {
-    border-radius: 50px !important; /* Botones píldora */
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+/* ======= Botones primarios ======= */
+.btn.btn-primary,
+button.btn-primary,
+a.btn-primary,
+input[type="submit"].btn-primary {
+  background-color: #57a992 !important;
+  border-color: #57a992 !important;
+  color: #fff !important;
 }
 
-/* Botón Primario (Guardar) */
-.btn-primary, .btn-info {
-    background-color: var(--ucn-blue) !important;
-    border-color: var(--ucn-blue) !important;
+.btn.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+input[type="submit"].btn-primary:hover {
+  background-color: #57a992 !important;
+  border-color: #57a992 !important;
+  color: #fff !important;
 }
 
-.btn-primary:hover, .btn-info:hover {
-    background-color: #002240 !important;
-    box-shadow: 0 4px 10px rgba(0, 48, 87, 0.3);
+/* ======= Botones secundarios ======= */
+.btn.btn-secondary,
+button.btn-secondary,
+a.btn-secondary {
+  background-color: #003057 !important;
+  border-color: #003057 !important;
+  color: #fff !important;
 }
 
-/* Botón de Acción/Éxito (Verde UCN) */
-.btn-success {
-    background-color: var(--ucn-green) !important;
-    border-color: var(--ucn-green) !important;
-    color: var(--ucn-blue) !important;
+.btn.btn-secondary:hover,
+button.btn-secondary:hover,
+a.btn-secondary:hover {
+  background-color: #001f3d !important;
+  border-color: #001f3d !important;
 }
 
-/* 5. SIDEBAR (BARRA LATERAL) */
-/* Si usas 'sidebar-light-primary' en settings.py, esto resalta el item activo */
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-    background-color: var(--ucn-blue) !important;
-    color: #ffffff !important;
-    border-radius: 0 25px 25px 0 !important; /* Borde redondeado solo a la derecha */
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+/* Ajuste del tamaño del logo en la pantalla de login */
+.login-logo img {
+    width: 200px !important;  /* puedes probar con 150 o 180 si prefieres */
+    height: auto !important;
+    margin: 20px auto !important;
+    display: block;
 }
 
-/* Iconos del sidebar */
-.nav-sidebar .nav-item > .nav-link i {
-    color: var(--ucn-blue);
-}
-.nav-sidebar .nav-item > .nav-link.active i {
-    color: #fff;
+/* ===== BOTONES PRINCIPALES DEL ADMIN ===== */
+
+/* Botones de acción generales (Guardar, Añadir, Editar) */
+.content-wrapper .btn.btn-primary,
+.content-wrapper .btn-primary,
+.card-footer .btn.btn-primary,
+.card-footer .btn-primary {
+    background-color: #003865 !important;   /* azul institucional UCN */
+    border-color: #003865 !important;
+    color: #fff !important;
 }
 
-/* 6. LOGIN MEJORADO */
-.login-page {
-    background: linear-gradient(135deg, var(--ucn-blue) 0%, #001f3d 100%) !important;
+.content-wrapper .btn.btn-primary:hover,
+.content-wrapper .btn-primary:hover,
+.card-footer .btn.btn-primary:hover,
+.card-footer .btn-primary:hover {
+    background-color: #005a8c !important;   /* azul claro UCN */
+    border-color: #005a8c !important;
 }
 
-.login-box {
-    width: 400px !important;
+/* Botones de éxito (Guardar cambios, etc.) */
+.content-wrapper .btn.btn-success,
+.content-wrapper .btn-success,
+.card-footer .btn.btn-success {
+    background-color: #65d7ad  !important;   /* verde institucional UCN */
+    border-color: #65d7ad  !important;
+    color: #fff !important;
 }
 
-.login-card-body {
-    border-radius: 15px !important;
-    padding: 40px !important;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.3) !important;
+.content-wrapper .btn.btn-success:hover,
+.content-wrapper .btn-success:hover,
+.card-footer .btn.btn-success:hover {
+    background-color: #57a992  !important;   /* verde más oscuro al hover */
+    border-color: #57a992  !important;
 }
 
-.login-logo a {
-    color: white !important;
-    font-weight: bold;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+
+/* Hover uniforme para el menú de perfil */
+.navbar .dropdown-menu .dropdown-item {
+    color: #003057 !important; /* texto azul institucional */
+}
+
+.navbar .dropdown-menu .dropdown-item:hover {
+    background-color: #65d7ad!important; /* verde pastel al pasar el mouse */
+    color: #003057 !important;
+}
+
+.navbar .dropdown-menu .dropdown-item i {
+    color: #003057 !important; /* íconos en azul institucional */
 }

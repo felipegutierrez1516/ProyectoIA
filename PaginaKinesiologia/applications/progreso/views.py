@@ -73,9 +73,13 @@ def ver_progreso(request):
             'score_examen': score_examen,
             'total_correctas': total_correctas,
             'total_preguntas': total_preguntas,
-            # Lógica para la nota del docente (placeholder)
-            'nota_docente': ev.calificacion if hasattr(ev, 'calificacion') and ev.calificacion else "Pendiente",
-            'comentario': ev.comentario_docente if hasattr(ev, 'comentario_docente') else ""
+            
+            # --- CORRECCIÓN AQUÍ ---
+            # Usamos el nombre real del modelo: puntaje_diagnostico
+            'nota_docente': ev.puntaje_diagnostico if ev.puntaje_diagnostico is not None else "Pendiente",
+            
+            # Comentario del docente
+            'comentario': ev.comentario_docente if ev.comentario_docente else ""
         }
         reporte.append(item)
 

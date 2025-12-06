@@ -14,3 +14,7 @@ class Solicitud_Inscripcion(models.Model):
 
     def __str__(self):
         return f"{self.id}"
+    
+    class Meta:
+        verbose_name = "Solicitud de Inscripción"
+        verbose_name_plural = "Solicitudes de Inscripción"

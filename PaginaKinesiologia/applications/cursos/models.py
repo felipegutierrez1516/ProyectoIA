@@ -9,6 +9,11 @@ class Aprendizaje_Esperado(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nombre}"
+    
+    class Meta:
+        verbose_name = "Aprendizaje Esperado"
+        verbose_name_plural = "Aprendizajes Esperados"
+
 
 
 class Curso(models.Model):
@@ -23,3 +28,7 @@ class Curso(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nombre}"
+    
+    class Meta:
+        verbose_name = "Curso"
+        verbose_name_plural = "Cursos"

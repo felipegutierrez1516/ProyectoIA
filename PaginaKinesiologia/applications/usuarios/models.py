@@ -10,6 +10,11 @@ class Perfil(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.rol}"
+    
+    class Meta:
+        verbose_name = "Perfil"
+        verbose_name_plural = "Perfiles"
+
 
 
 class Docente(models.Model):
@@ -18,6 +23,11 @@ class Docente(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.perfil.user.get_full_name()}"
+
+class Meta:
+        verbose_name = "Docente"
+        verbose_name_plural = "Docentes"
+
 
 
 class Estudiante(models.Model):
@@ -36,3 +46,7 @@ class Estudiante(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.perfil.user.get_full_name()}"
+    
+    class Meta:
+        verbose_name = "Estudiante"
+        verbose_name_plural = "Estudiantes"

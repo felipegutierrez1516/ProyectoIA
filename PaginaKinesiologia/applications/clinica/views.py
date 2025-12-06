@@ -291,7 +291,7 @@ def iniciar_evaluacion(request, paciente_id):
         estudiante=estudiante,
         paciente=paciente,
         estado='en_curso'
-    ).update(estado='abandonada') # O puedes usar .delete() si prefieres borrar el historial basura
+    ).delete() # O puedes usar .delete() si prefieres borrar el historial basura
 
     # 2. Crear la NUEVA evaluación limpia
     Evaluacion.objects.create(
